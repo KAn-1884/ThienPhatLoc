@@ -1,4 +1,3 @@
-import React from "react";
 import { useNavigate } from "react-router-dom";
 import {
   AppBar,
@@ -11,8 +10,6 @@ import {
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import Logo from "../assets/img/logo_TPL.jpeg";
-import ProjectCard from "../components/ProjectCard.jsx";
-import Status from "../components/Status.jsx";
 import { Outlet } from "react-router-dom";
 
 function DashboardPage() {

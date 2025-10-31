@@ -1,8 +1,6 @@
-import React from "react";
 import { Stack, Chip, Avatar } from "@mui/material";
 import { useState } from "react";
 import initialStatuses from "../data/initialStatuses";
-import { HowToVoteRounded } from "@mui/icons-material";
 
 const baseChipStyle = {
   fontWeight: "bold",

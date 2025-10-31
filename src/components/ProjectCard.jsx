@@ -1,4 +1,3 @@
-import React from "react";
 import { Box, Card, CardContent, Typography, Chip, Stack } from "@mui/material";
 import EventIcon from "@mui/icons-material/Event";
 import { useNavigate } from "react-router-dom";

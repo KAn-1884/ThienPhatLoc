@@ -1,5 +1,3 @@
-// src/data/workItems.js
-
 export const workItems = [
   {
     id: 1,

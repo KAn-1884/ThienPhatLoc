@@ -1,4 +1,3 @@
-import React from "react";
 import { Box, Typography, Grid } from "@mui/material";
 import ProjectCard from "./ProjectCard.jsx";
 import Status from "./Status.jsx";
