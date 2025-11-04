@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, NavLink, Outlet } from "react-router-dom";
 import {
   AppBar,
   Box,
@@ -10,16 +10,13 @@ import {
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import Logo from "../assets/img/logo_TPL.jpeg";
-import { Outlet } from "react-router-dom";
+import ArticleIcon from "@mui/icons-material/Article"; // === 1. THÊM IMPORT ICON ===
 
 function DashboardPage() {
   const navigate = useNavigate();
 
   const handleLogout = () => {
     navigate("/login");
-  };
-  const handleCreateCard = () => {
-    navigate("createCard");
   };
 
   return (
@@ -44,35 +41,75 @@ function DashboardPage() {
             Thiên Phát Lộc E&C
           </Typography>
           <Box sx={{ flexGrow: 1 }} />
-          <Button
-            variant="contained"
-            startIcon={<AddIcon />}
-            sx={{
-              backgroundColor: "#1C5B41",
-              "&:hover": { backgroundColor: "#154A32" },
-              mr: 2,
-              textTransform: "none",
-              borderRadius: "8px",
-            }}
-            onClick={handleCreateCard}
-          >
-            Tạo mới
-          </Button>
-          <Button
-            variant="outlined"
-            sx={{
-              mr: 2,
-              textTransform: "none",
-              borderRadius: "8px",
-              borderColor: "#1C5B41",
-              color: "#1C5B41",
-            }}
-            onClick={() => {
-              navigate("/");
-            }}
-          >
-            Danh sách
-          </Button>
+
+          <NavLink to="createPage">
+            {({ isActive }) => (
+              <Button
+                variant="contained"
+                startIcon={<AddIcon />}
+                sx={{
+                  mr: 2,
+                  textTransform: "none",
+                  borderRadius: "8px",
+                  borderColor: "#1C5B41",
+                  backgroundColor: isActive ? "#1C5B41" : "#fff",
+                  color: isActive ? "#fff" : "#1C5B41",
+                  "&:hover": {
+                    backgroundColor: isActive ? "#154A32" : "#f0f0f0",
+                  },
+                }}
+              >
+                Tạo mới
+              </Button>
+            )}
+          </NavLink>
+
+          {/* (Giữ nguyên code của bạn) */}
+          <NavLink to="/">
+            {({ isActive }) => (
+              <Button
+                variant="contained"
+                sx={{
+                  mr: 2,
+                  textTransform: "none",
+                  borderRadius: "8px",
+                  borderColor: "#1C5B41",
+                  backgroundColor: isActive ? "#1C5B41" : "#fff",
+                  color: isActive ? "#fff" : "#1C5B41",
+                  "&:hover": {
+                    backgroundColor: isActive ? "#154A32" : "#f0f0f0",
+                  },
+                }}
+              >
+                Danh sách
+              </Button>
+            )}
+          </NavLink>
+
+          {/* === 2. THÊM NÚT "TÀI LIỆU" MỚI === */}
+          <NavLink to="documents">
+            {({ isActive }) => (
+              <Button
+                variant="contained"
+                startIcon={<ArticleIcon />}
+                sx={{
+                  mr: 2,
+                  textTransform: "none",
+                  borderRadius: "8px",
+                  borderColor: "#1C5B41",
+                  backgroundColor: isActive ? "#1C5B41" : "#fff",
+                  color: isActive ? "#fff" : "#1C5B41",
+                  "&:hover": {
+                    backgroundColor: isActive ? "#154A32" : "#f0f0f0",
+                  },
+                }}
+              >
+                Tài liệu
+              </Button>
+            )}
+          </NavLink>
+          {/* ================================== */}
+
           <IconButton onClick={handleLogout}>
             <Avatar sx={{ backgroundColor: "#1C5B41" }}>Out</Avatar>
           </IconButton>

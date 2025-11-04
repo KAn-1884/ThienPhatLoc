@@ -1,15 +1,15 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import { CssBaseline } from "@mui/material"; // <-- IMPORT Ở ĐÂY
+import { CssBaseline } from "@mui/material";
 
 import DashboardPage from "./pages/DashboardPage";
-import DashboardHome from "./components/DashboardHome.jsx";
 import LoginPage from "./pages/LoginPage.jsx";
+import CreatePage from "./pages/CreatePage.jsx";
 import CardDetail from "./components/CardDetail.jsx";
-import CreateCard from "./components/CreateCard.jsx";
+import DashboardHome from "./components/DashboardHome.jsx";
 import ApprovalCard from "./components/ApprovalCard.jsx";
-
+import DocumentPage from "./pages/DocumentPage.jsx";
 const router = createBrowserRouter([
   {
     path: "/login",
@@ -24,10 +24,20 @@ const router = createBrowserRouter([
         element: <DashboardHome />,
       },
       {
-        path: "createCard",
-        element: <CreateCard />,
+        path: "createPage",
+        element: <CreatePage />,
+        children: [
+          {
+            path: "approval",
+            element: <ApprovalCard />,
+          },
+        ],
       },
-      { path: "createCard/approval", element: <ApprovalCard /> },
+
+      {
+        path: "documents",
+        element: <DocumentPage />,
+      },
     ],
   },
   {
@@ -38,7 +48,7 @@ const router = createBrowserRouter([
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
-    <CssBaseline /> {/* <-- THÊM VÀO ĐÂY */}
+    <CssBaseline />
     <RouterProvider router={router} />
   </React.StrictMode>
 );

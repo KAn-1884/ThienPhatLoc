@@ -76,7 +76,6 @@ export default function CardDetail() {
         maxWidth: "100vw",
       }}
     >
-      {/* ==== APP BAR ==== */}
       <AppBar
         position="static"
         elevation={1}
@@ -106,14 +105,13 @@ export default function CardDetail() {
 
           <Box sx={{ flexGrow: 1 }} />
 
-          {/* Ẩn trên mobile */}
           <Box sx={{ display: { xs: "none", md: "flex" } }}>
             <Button
               variant="contained"
               startIcon={<AddIcon />}
               sx={{
-                backgroundColor: "#1C5B41",
-                "&:hover": { backgroundColor: "#154A32" },
+                backgroundColor: "#fff",
+                color: "#1C5B41",
                 mr: 2,
                 textTransform: "none",
                 borderRadius: "8px",
@@ -124,11 +122,13 @@ export default function CardDetail() {
             <Button
               variant="outlined"
               sx={{
+                backgroundColor: "#1C5B41",
+                "&:hover": { backgroundColor: "#154A32" },
                 mr: 2,
                 textTransform: "none",
                 borderRadius: "8px",
                 borderColor: "#1C5B41",
-                color: "#1C5B41",
+                color: "#fff",
               }}
             >
               Danh sách
@@ -151,7 +151,6 @@ export default function CardDetail() {
             overflow: "hidden",
           }}
         >
-          {/* === Header buttons === */}
           <Box
             sx={{
               display: "flex",
@@ -246,49 +245,41 @@ export default function CardDetail() {
             }}
           />
 
-          {/* // ===========================================
-            // === SỬA ĐỔI BẮT ĐẦU TỪ ĐÂY ===
-            // ===========================================
-          */}
-
           {/* === General info === */}
           <Box
             sx={{
               mb: 4,
-              backgroundColor: "#F7FAFC",
+              backgroundColor: "#EDF2F7",
               borderRadius: "12px",
-              p: { xs: 2, sm: 3 }, // Dùng padding cho cả khối
+              p: { xs: 2, sm: 3 },
             }}
           >
             {projectInfo.map((item) => (
-              // Mỗi hàng là một Box flex
               <Box
                 key={item.label}
                 sx={{
                   display: "flex",
                   flexDirection: "row",
-                  alignItems: "flex-start", // Căn lề trên nếu value dài
-                  mb: 2, // Khoảng cách giữa các hàng
-                  "&:last-child": { mb: 0 }, // Bỏ margin cho hàng cuối
+                  alignItems: "flex-start",
+                  mb: 2,
+                  "&:last-child": { mb: 0 },
                 }}
               >
-                {/* CỘT 1: LABEL */}
                 <Typography
                   color="text.secondary"
                   sx={{
                     fontWeight: 500,
-                    width: { xs: "80px", sm: "100px" }, // Cố định độ rộng label
-                    flexShrink: 0, // Ngăn label co lại
+                    width: { xs: "80px", sm: "100px" },
+                    flexShrink: 0,
                   }}
                 >
                   {item.label}:
                 </Typography>
 
-                {/* CỘT 2: VALUE */}
                 <Typography
                   sx={{
-                    ml: 2, // Thêm khoảng cách trái
-                    wordBreak: "break-word", // Tự động xuống dòng nếu quá dài
+                    ml: 2,
+                    wordBreak: "break-word",
                   }}
                 >
                   {item.value}
@@ -296,11 +287,6 @@ export default function CardDetail() {
               </Box>
             ))}
           </Box>
-
-          {/* // ===========================================
-            // === SỬA ĐỔI KẾT THÚC TẠI ĐÂY ===
-            // ===========================================
-          */}
 
           {/* === Table section === */}
           <TableContainer
@@ -336,7 +322,14 @@ export default function CardDetail() {
               </TableHead>
               <TableBody>
                 {workItems.map((item) => (
-                  <TableRow key={item.id}>
+                  <TableRow
+                    key={item.id}
+                    sx={{
+                      "&:nth-of-type(odd)": { backgroundColor: "#f9f9f9" },
+                      "&:nth-of-type(even)": { backgroundColor: "#EDF2F7" },
+                      "&:hover": { backgroundColor: "#e8f5e9" },
+                    }}
+                  >
                     <TableCell>{item.id}</TableCell>
                     <TableCell>{item.name}</TableCell>
                     <TableCell align="right" sx={{ fontWeight: 500 }}>
@@ -361,53 +354,79 @@ export default function CardDetail() {
           <Box
             sx={{
               display: "flex",
-              flexDirection: { xs: "column", sm: "row" },
+              alignItems: "center",
               justifyContent: "space-between",
-              alignItems: { xs: "flex-start", sm: "center" },
               p: 2,
-              backgroundColor: "#f9fafb",
-              borderRadius: "20px",
-              mt: 2,
-              gap: { xs: 1, sm: 0 },
+              borderTop: "4px solid #2D5F3F",
+              backgroundColor: "#EDF2F7",
+              borderRadius: "0 0 20px 20px",
             }}
           >
-            <Typography variant="h6" sx={{ fontWeight: "bold" }}>
-              TỔNG CỘNG
-            </Typography>
+            {/* Cột trống bên trái để cân giữa */}
+            <Box sx={{ flex: 1 }} />
+
+            {/* Chữ “TỔNG CỘNG” nằm chính giữa */}
+            <Box sx={{ flex: 1, textAlign: "center" }}>
+              <Typography
+                variant="h6"
+                sx={{
+                  fontWeight: "bold",
+                  color: "#333",
+                }}
+              >
+                TỔNG CỘNG
+              </Typography>
+            </Box>
+
+            {/* Cột bên phải: số tiền + chấm + chữ */}
             <Box
               sx={{
-                textAlign: "center",
+                flex: 1,
                 display: "flex",
+                justifyContent: "flex-end",
                 alignItems: "center",
                 gap: 1,
+                flexWrap: "nowrap",
               }}
             >
               <Typography
-                variant="h6"
-                sx={{ fontWeight: "bold", color: "#2D5F3F" }}
+                variant="subtitle1"
+                sx={{
+                  fontWeight: "bold",
+                  color: "#2D5F3F",
+                  whiteSpace: "nowrap",
+                }}
               >
                 {totalCost}
               </Typography>
+
               <Box
                 sx={{
                   width: 4,
                   height: 4,
                   borderRadius: "50%",
                   backgroundColor: "text.secondary",
-                  opacity: "0.7",
+                  opacity: 0.7,
                 }}
               ></Box>
+
               <Typography
                 variant="body2"
-                sx={{ fontStyle: "italic", color: "text.secondary" }}
+                sx={{
+                  color: "text.secondary",
+                  fontStyle: "italic",
+                  whiteSpace: "nowrap",
+                }}
               >
-                ({costInWords})
+                {costInWords}
               </Typography>
             </Box>
           </Box>
 
           {/* === Signature section === */}
-          <Box sx={{ mt: 8 }}>
+          <Box
+            sx={{ mt: 8, backgroundColor: "#EDF2F7", borderRadius: 2, p: 2 }}
+          >
             <Typography
               sx={{
                 mb: 4,

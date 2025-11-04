@@ -1,11 +1,6 @@
-import { useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
-import { numberToVietnameseWords } from "../changeNum2Word/num2wod.jsx";
-
 import {
   Box,
   Typography,
-  Button,
   Container,
   Paper,
   Table,
@@ -14,137 +9,96 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  Divider,
-  FormControl,
-  Select,
-  MenuItem,
-  TextField,
-  InputAdornment,
   Grid,
+  Divider,
+  Button,
   Dialog,
-  DialogContent,
   DialogActions,
+  DialogContent,
 } from "@mui/material";
 import SaveIcon from "@mui/icons-material/Save";
-import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import { useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { numberToVietnameseWords } from "../changeNum2Word/num2wod.jsx";
+
+const formatDisplayDate = (dateString) => {
+  if (!dateString) return "—";
+  try {
+    const [year, month, day] = dateString.split("-");
+    return `${day}/${month}/${year}`;
+  } catch (e) {
+    return e.dateString;
+  }
+};
 
 const formatCurrency = (v) =>
-  new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(
-    Number(v) || 0
-  );
+  new Intl.NumberFormat("vi-VN").format(Number(v) || 0) + " đ";
 
-const convertTotalToWords = (total) => `(${numberToVietnameseWords(total)})`;
-
-const getApprovalDate = () => {
-  const d = new Date();
-  return `Ngày ${d.getDate()} tháng ${d.getMonth() + 1} năm ${d.getFullYear()}`;
-};
-
-const formatDate = (dateString) =>
-  !dateString
-    ? ""
-    : new Date(dateString).toLocaleDateString("vi-VN", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-      });
-
-const disabledTextFieldStyle = {
-  "& .MuiInput-underline:before": {
-    borderBottom: "1.5px solid rgba(0, 0, 0, 0.15)",
-  },
-  "& .MuiInput-underline.Mui-disabled:before": {
-    borderBottom: "1.5px solid rgba(0, 0, 0, 0.15)",
-  },
-};
-
-const ApprovalSelect = ({ label, value, onChange }) => (
-  <Grid item xs={12} sm={6} md={3}>
-    <Typography fontWeight="bold" variant="body2" gutterBottom>
-      {label}
-    </Typography>
-    <FormControl variant="standard" fullWidth size="small">
-      <Select value={value} onChange={onChange}>
-        <MenuItem value="pending">--Chưa--</MenuItem>
-        <MenuItem value="approved">Duyệt</MenuItem>
-        <MenuItem value="rejected">Từ chối</MenuItem>
-      </Select>
-    </FormControl>
-  </Grid>
+const InfoRow = ({ label, value }) => (
+  <Box sx={{ display: "flex", alignItems: "flex-start", mb: 2 }}>
+    <Typography sx={{ minWidth: 120, fontWeight: 600 }}>{label}:</Typography>
+    <Typography sx={{ ml: 2, wordBreak: "break-word" }}>{value}</Typography>
+  </Box>
 );
+// =============================================
 
 export default function ApprovalCard() {
-  const { state } = useLocation();
+  const location = useLocation();
   const navigate = useNavigate();
 
-  const [approvalState, setApprovalState] = useState({
-    truongPhong: "pending",
-    tc_kt: "pending",
-    banGiamDoc: "pending",
-  });
+  const { formData, workItems, totalCost, approvalState } =
+    location.state || {};
 
-  // === BƯỚC 1: THÊM STATE MỚI CHO POP-UP ===
-  const [openConfirm, setOpenConfirm] = useState(false);
+  const [openSubmitDialog, setOpenSubmitDialog] = useState(false);
+  const [openSuccessDialog, setOpenSuccessDialog] = useState(false);
 
-  const { formData, workItems, totalCost } = state;
-  const TABLE_HEADERS = ["STT", "CÔNG VIỆC", "SỐ TIỀN", "GHI CHÚ"];
+  const handleOpenSubmit = () => setOpenSubmitDialog(true);
+  const handleCloseSubmit = () => setOpenSubmitDialog(false);
 
-  const handleChange = (field) => (e) =>
-    setApprovalState((prev) => ({ ...prev, [field]: e.target.value }));
-
-  // === BƯỚC 2: THÊM CÁC HÀM XỬ LÝ POP-UP ===
-  const handleOpenConfirm = () => {
-    setOpenConfirm(true);
-  };
-
-  const handleCloseConfirm = () => {
-    setOpenConfirm(false);
+  const handleCloseSuccess = () => {
+    setOpenSuccessDialog(false);
+    navigate("/");
   };
 
   const handleConfirmSubmit = () => {
-    // --- TẠI ĐÂY: Thêm logic "Gửi duyệt" của bạn ---
-    console.log("Đã xác nhận gửi duyệt:", approvalState);
-
-    // 1. Đóng pop-up
-    handleCloseConfirm();
-
-    // 2. (Tùy chọn) Chuyển về trang chủ sau khi gửi
-    // navigate("/");
+    handleCloseSubmit();
+    console.log("Đã gửi duyệt biểu mẫu!");
+    setOpenSuccessDialog(true);
   };
 
-  const approvals = [
-    { label: "CHỈ HUY TRƯỞNG CT", field: "truongPhong" },
-    { label: "PHÒNG TC-KT", field: "tc_kt" },
-    { label: "BAN GIÁM ĐỐC", field: "banGiamDoc" },
-  ];
+  const getApprovalDate = () => {
+    const d = new Date();
+    return `Ngày ${d.getDate()} tháng ${
+      d.getMonth() + 1
+    } năm ${d.getFullYear()}`;
+  };
 
-  const renderField = (label, value) => (
-    <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
-      <Typography
-        sx={{
-          width: 100,
-          fontWeight: 600,
-          color: "text.secondary",
-          textAlign: "left",
-        }}
-      >
-        {label}:
-      </Typography>
-      <TextField
-        variant="standard"
-        value={value}
-        fullWidth
-        disabled
-        sx={{ ml: 2, ...disabledTextFieldStyle }}
-      />
-    </Box>
-  );
+  if (!formData) {
+    return (
+      <Container sx={{ py: 10, textAlign: "center" }}>
+        <Typography>Bạn chưa nhập dữ liệu biểu mẫu.</Typography>
+        <Button
+          variant="contained"
+          sx={{ mt: 2, backgroundColor: "#1C5B41" }}
+          onClick={() => navigate(-1)}
+        >
+          Quay lại
+        </Button>
+      </Container>
+    );
+  }
 
   return (
-    <Box sx={{ backgroundColor: "#f4f6f8", minHeight: "100vh" }}>
+    <Box sx={{ backgroundColor: "#f9fafb", minHeight: "100vh" }}>
       <Container maxWidth="lg" sx={{ py: 4 }}>
-        <Paper elevation={3} sx={{ p: 4, borderRadius: 4 }}>
+        <Paper
+          elevation={3}
+          sx={{
+            p: 4,
+            borderRadius: 4,
+            borderBottom: "4px solid rgba(17, 106, 1, 1)",
+          }}
+        >
           <Typography
             variant="h5"
             fontWeight="bold"
@@ -152,8 +106,9 @@ export default function ApprovalCard() {
             textAlign="center"
             mb={2}
           >
-            BẢNG TỔNG HỢP CHI PHÍ THI CÔNG
+            PHIẾU DUYỆT CHI PHÍ THI CÔNG
           </Typography>
+
           <Divider
             sx={{
               backgroundColor: "#2D5F3F",
@@ -164,198 +119,289 @@ export default function ApprovalCard() {
           />
 
           <Box
-            sx={{ p: 3, borderRadius: 2, backgroundColor: "#f9fafb", mb: 4 }}
+            sx={{
+              p: 3,
+              borderRadius: 2,
+              backgroundColor: "#F7FAFC",
+              mb: 4,
+              textAlign: "left",
+            }}
           >
-            {renderField("Dự án", formData.project)}
-            {renderField("Địa điểm", formData.address)}
-            <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
-              <Typography
-                sx={{
-                  width: 100,
-                  fontWeight: 600,
-                  color: "text.secondary",
-                  textAlign: "left",
-                }}
-              >
-                Thời gian:
-              </Typography>
-              <Box
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 2,
-                  flex: 1,
-                  ml: 2,
-                }}
-              >
-                <TextField
-                  type="text"
-                  variant="standard"
-                  value={formatDate(formData.dateFrom)}
-                  sx={{ width: 140, ...disabledTextFieldStyle }}
-                  disabled
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <CalendarTodayIcon sx={{ fontSize: "1.2rem" }} />
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-                <Typography sx={{ color: "text.secondary" }}> - </Typography>
-                <TextField
-                  type="text"
-                  variant="standard"
-                  value={formatDate(formData.dateTo)}
-                  sx={{ width: 140, ...disabledTextFieldStyle }}
-                  disabled
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <CalendarTodayIcon sx={{ fontSize: "1.2rem" }} />
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-              </Box>
-            </Box>
-            {renderField("Đợt", formData.batch)}
+            <InfoRow label="Dự án" value={formData.project || "—"} />
+            <InfoRow label="Địa điểm" value={formData.address || "—"} />
+            <InfoRow
+              label="Thời gian"
+              value={
+                formData.dateFrom
+                  ? `${formatDisplayDate(
+                      formData.dateFrom
+                    )} - ${formatDisplayDate(formData.dateTo)}`
+                  : "—"
+              }
+            />
+            <InfoRow label="Đợt" value={formData.batch || "—"} />
           </Box>
 
-          <TableContainer component={Paper} variant="outlined" sx={{ mb: 4 }}>
+          <TableContainer component={Paper} variant="outlined" sx={{ mb: 3 }}>
             <Table size="small">
-              <TableHead sx={{ backgroundColor: "#2D5F3F" }}>
+              <TableHead>
                 <TableRow>
-                  {TABLE_HEADERS.map((h) => (
-                    <TableCell
-                      key={h}
-                      sx={{ color: "#fff", fontWeight: "bold" }}
-                      align={h === "SỐ TIỀN" ? "right" : "left"}
-                    >
-                      {h}
-                    </TableCell>
-                  ))}
+                  <TableCell
+                    sx={{
+                      width: "5%",
+                      borderBottom: "1px solid #E5E7EB",
+                      backgroundColor: "#2D5F3F",
+                      fontWeight: 600,
+                      color: "white",
+                    }}
+                  >
+                    STT
+                  </TableCell>
+                  <TableCell
+                    sx={{
+                      width: "40%",
+                      borderBottom: "1px solid #E5E7EB",
+                      backgroundColor: "#2D5F3F",
+                      fontWeight: 600,
+                      color: "white",
+                    }}
+                  >
+                    CÔNG VIỆC
+                  </TableCell>
+                  <TableCell
+                    sx={{
+                      width: "20%",
+                      borderBottom: "1px solid #E5E7EB",
+                      backgroundColor: "#2D5F3F",
+                      fontWeight: 600,
+                      color: "white",
+                    }}
+                  >
+                    SỐ TIỀN
+                  </TableCell>
+                  <TableCell
+                    sx={{
+                      width: "35%",
+                      borderBottom: "1px solid #E5E7EB",
+                      backgroundColor: "#2D5F3F",
+                      fontWeight: 600,
+                      color: "white",
+                    }}
+                  >
+                    GHI CHÚ
+                  </TableCell>
                 </TableRow>
               </TableHead>
+
               <TableBody>
-                {workItems.map((item, index) => (
-                  <TableRow key={item.id}>
-                    <TableCell>{index + 1}</TableCell>
-                    <TableCell>{item.name}</TableCell>
-                    <TableCell align="right">
-                      {formatCurrency(item.cost)}
+                {workItems?.map((row, i) => (
+                  <TableRow
+                    key={row.id}
+                    sx={{
+                      backgroundColor: i % 2 === 0 ? "#FFFFFF" : "#F7FAFC",
+                    }}
+                  >
+                    <TableCell sx={{ borderBottom: "1px solid #E5E7EB" }}>
+                      {i + 1}
                     </TableCell>
-                    <TableCell>{item.note}</TableCell>
+                    <TableCell sx={{ borderBottom: "1px solid #E5E7EB" }}>
+                      {row.name || "—"}
+                    </TableCell>
+                    <TableCell
+                      align="right"
+                      sx={{ borderBottom: "1px solid #E5E7EB" }}
+                    >
+                      {formatCurrency(row.cost)}
+                    </TableCell>
+                    <TableCell sx={{ borderBottom: "1px solid #E5E7EB" }}>
+                      {row.note || ""}
+                    </TableCell>
                   </TableRow>
                 ))}
-                <TableRow sx={{ backgroundColor: "#f0f0f0" }}>
-                  <TableCell colSpan={2} sx={{ fontWeight: "bold" }}>
-                    TỔNG CỘNG
-                  </TableCell>
-                  <TableCell align="right" sx={{ fontWeight: "bold" }}>
-                    {formatCurrency(totalCost)}
-                  </TableCell>
-                  <TableCell sx={{ fontStyle: "italic" }}>
-                    {convertTotalToWords(totalCost)}
-                  </TableCell>
-                </TableRow>
               </TableBody>
             </Table>
           </TableContainer>
 
+          {/* --- Tổng cộng --- */}
           <Box
-            sx={{ p: 3, borderRadius: 2, backgroundColor: "#f9fafb", mb: 4 }}
+            sx={{
+              borderTop: "4px solid #2D5F3F",
+              backgroundColor: "#F8FAFC",
+              p: 3,
+              borderBottom: "1px solid #E2E8F0",
+              display: "flex",
+              justifyContent: "center",
+              flexWrap: "wrap",
+              alignItems: "center",
+              gap: 2,
+            }}
           >
-            <Typography textAlign="center" mb={3} fontStyle="italic">
+            <Typography variant="h6" sx={{ fontWeight: "bold" }}>
+              TỔNG CỘNG
+            </Typography>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+              <Typography
+                variant="h6"
+                sx={{ fontWeight: "bold", color: "#2D5F3F" }}
+              >
+                {formatCurrency(totalCost)}
+              </Typography>
+              <Box
+                sx={{
+                  width: 4,
+                  height: 4,
+                  borderRadius: "50%",
+                  backgroundColor: "text.secondary",
+                  opacity: "0.7",
+                  mx: 0.5,
+                }}
+              />
+              <Typography variant="body2" sx={{ color: "#475569" }}>
+                {numberToVietnameseWords(totalCost)}
+              </Typography>
+            </Box>
+          </Box>
+
+          {/* --- Ký duyệt --- */}
+          <Box
+            sx={{
+              p: 3,
+              borderRadius: 2,
+              backgroundColor: "#f9fafb",
+              mt: 4,
+              textAlign: "center",
+            }}
+          >
+            <Typography mb={3} fontStyle="italic">
               {getApprovalDate()}
             </Typography>
             <Grid
               container
               spacing={2}
               textAlign="center"
-              justifyContent="space-between"
+              justifyContent="space-evenly"
+              alignItems="center"
             >
               <Grid item xs={12} sm={6} md={3}>
                 <Typography fontWeight="bold" variant="body2" gutterBottom>
                   NGƯỜI LẬP
                 </Typography>
-                <Typography>{formData.creator || "Lê Văn Bằng"}</Typography>
+                <Typography>{formData.creator}</Typography>
               </Grid>
-              {approvals.map(({ label, field }) => (
-                <ApprovalSelect
-                  key={field}
-                  label={label}
-                  value={approvalState[field]}
-                  onChange={handleChange(field)}
-                />
+              {[
+                { label: "CHỈ HUY TRƯỞNG", field: "chief" },
+                { label: "KẾ TOÁN", field: "accountant" },
+                { label: "GIÁM ĐỐC", field: "director" },
+              ].map(({ label, field }) => (
+                <Grid item xs={12} sm={6} md={3} key={field}>
+                  <Typography fontWeight="bold" variant="body2" gutterBottom>
+                    {label}
+                  </Typography>
+                  <Typography>
+                    {approvalState?.[field] || "________________"}
+                  </Typography>
+                </Grid>
               ))}
             </Grid>
           </Box>
-
-          <Box sx={{ display: "flex", justifyContent: "space-between", mt: 3 }}>
-            <Button
-              variant="outlined"
-              sx={{
-                textTransform: "none",
-                borderRadius: "8px",
-                borderColor: "#4A5568",
-                color: "#4A5568",
-                "&:hover": { borderColor: "#2D3748", color: "#2D3748" },
-              }}
-              startIcon={<ArrowBackIcon />}
-              onClick={() => navigate(-1)}
-            >
-              Quay lại
-            </Button>
-
-            <Button
-              variant="contained"
-              sx={{ backgroundColor: "#1C5B41" }}
-              startIcon={<SaveIcon />}
-              onClick={handleOpenConfirm}
-            >
-              Gửi duyệt
-            </Button>
-          </Box>
-
-          <Dialog
-            open={openConfirm}
-            onClose={handleCloseConfirm}
-            maxWidth="xs"
-            fullWidth
-          >
-            <DialogContent sx={{ textAlign: "center", py: 4 }}>
-              <Typography variant="h6" fontWeight="bold" gutterBottom>
-                Xác nhận gửi duyệt
-              </Typography>
-              <Typography>
-                Bạn có chắc chắn muốn gửi biểu mẫu này để duyệt không?
-              </Typography>
-            </DialogContent>
-            <DialogActions sx={{ justifyContent: "center", pb: 3, gap: 1 }}>
-              <Button
-                onClick={handleCloseConfirm}
-                variant="outlined"
-                color="inherit"
-                sx={{ borderRadius: "8px" }}
-              >
-                Hủy bỏ
-              </Button>
-              <Button
-                onClick={handleConfirmSubmit}
-                variant="contained"
-                sx={{
-                  backgroundColor: "#1C5B41",
-                  "&:hover": { backgroundColor: "#154A32" },
-                  borderRadius: "8px",
-                }}
-              >
-                Xác nhận
-              </Button>
-            </DialogActions>
-          </Dialog>
         </Paper>
+
+        {/* --- Nút hành động --- */}
+        <Box
+          textAlign="center"
+          mt={3}
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: 1.5,
+          }}
+        >
+          <Button
+            variant="contained"
+            startIcon={<SaveIcon />}
+            sx={{
+              backgroundColor: "#1C5B41",
+              textTransform: "none",
+              px: 4,
+              py: 1.2,
+              fontWeight: 600,
+              "&:hover": { backgroundColor: "#154A32" },
+            }}
+            onClick={handleOpenSubmit}
+          >
+            Gửi duyệt
+          </Button>
+        </Box>
       </Container>
+
+      {/* --- Dialog 1: Xác nhận gửi --- */}
+      <Dialog
+        open={openSubmitDialog}
+        onClose={handleCloseSubmit}
+        maxWidth="xs"
+        fullWidth
+      >
+        <DialogContent sx={{ textAlign: "center", py: 4 }}>
+          <Typography variant="h6" fontWeight="bold" gutterBottom>
+            Xác nhận gửi duyệt
+          </Typography>
+          <Typography>
+            Bạn có chắc chắn muốn gửi biểu mẫu này để duyệt không?
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ justifyContent: "center", pb: 3, gap: 1 }}>
+          <Button
+            onClick={handleCloseSubmit}
+            variant="outlined"
+            color="inherit"
+            sx={{ borderRadius: "8px" }}
+          >
+            Hủy bỏ
+          </Button>
+          <Button
+            onClick={handleConfirmSubmit}
+            variant="contained"
+            sx={{
+              backgroundColor: "#1C5B41",
+              "&:hover": { backgroundColor: "#154A32" },
+              borderRadius: "8px",
+            }}
+          >
+            Xác nhận
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* --- Dialog 2: Báo thành công --- */}
+      <Dialog
+        open={openSuccessDialog}
+        onClose={handleCloseSuccess}
+        maxWidth="xs"
+        fullWidth
+      >
+        <DialogContent sx={{ textAlign: "center", py: 4, pt: 5 }}>
+          <Typography variant="h6" fontWeight="bold" gutterBottom>
+            Gửi duyệt thành công!
+          </Typography>
+          <Typography>
+            Biểu mẫu chi phí đã được gửi đi để chờ xét duyệt.
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ justifyContent: "center", pb: 3 }}>
+          <Button
+            onClick={handleCloseSuccess}
+            variant="contained"
+            sx={{
+              backgroundColor: "#1C5B41",
+              "&:hover": { backgroundColor: "#154A32" },
+              borderRadius: "8px",
+            }}
+          >
+            Đã hiểu
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }
