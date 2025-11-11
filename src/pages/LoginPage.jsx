@@ -1,4 +1,4 @@
-import React from "react";
+import { useEffect } from "react";
 import {
   Box,
   Paper,
@@ -6,11 +6,14 @@ import {
   Typography,
   Divider,
   SvgIcon,
+  CircularProgress, // Thêm
 } from "@mui/material";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import { useNavigate } from "react-router-dom";
 import Backgourd from "../assets/img/background_screen-login.jpeg";
 import Logo from "../assets/img/logo_TPL.jpeg";
+import { mockUsers } from "../data/mockUsers";
+import { useMsal, useIsAuthenticated } from "@azure/msal-react";
 
 const BACKGROUND_IMAGE = Backgourd;
 const LOGO = Logo;
@@ -28,15 +31,71 @@ function MicrosoftLogoIcon(props) {
 
 function LoginPage() {
   const navigate = useNavigate();
+  // 1. LẤY THÊM "inProgress"
+  const { instance, accounts, inProgress } = useMsal();
+  const isAuthenticated = useIsAuthenticated();
+
+  useEffect(() => {
+    const checkRoleAndNavigate = () => {
+      // 2. THÊM ĐIỀU KIỆN: Chỉ chạy nếu MSAL không bận
+      if (isAuthenticated && accounts.length > 0 && inProgress === "none") {
+        const userEmail = accounts[0].username.toLowerCase();
+        console.log("LoginPage: Đăng nhập thành công với:", userEmail);
+
+        const foundUser = mockUsers.find(
+          (user) => user.email.toLowerCase() === userEmail
+        );
+
+        if (foundUser && foundUser.role) {
+          console.log("LoginPage: User có role. Chuyển về Dashboard.");
+          navigate("/");
+        } else {
+          console.log(
+            "LoginPage: User chưa có role. Chuyển đến trang Chọn Role."
+          );
+          navigate("/choose-role");
+        }
+      }
+    };
+
+    checkRoleAndNavigate();
+    // 3. THÊM "inProgress" VÀO DEPENDENCY ARRAY
+  }, [isAuthenticated, accounts, navigate, inProgress]);
 
   const handleMicrosoftLogin = () => {
-    console.log("Đang chuyển hướng đến trang đăng nhập Microsoft...");
+    if (inProgress !== "none") return;
+
+    const loginRequest = {
+      scopes: ["user.read"],
+    };
+    instance.loginRedirect(loginRequest).catch((e) => console.error(e));
   };
 
   const handleGoToRegister = () => {
     navigate("/register");
   };
 
+  if (inProgress !== "none") {
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          minHeight: "100vh",
+          bgcolor: "#f4f4f4",
+        }}
+      >
+        <CircularProgress sx={{ color: "#1C5B41" }} />
+        <Typography sx={{ mt: 2, color: "#1C5B41", fontWeight: 700 }}>
+          Đang xử lý đăng nhập...
+        </Typography>
+      </Box>
+    );
+  }
+
+  // Nếu không bận, render trang login
   return (
     <Box
       sx={{

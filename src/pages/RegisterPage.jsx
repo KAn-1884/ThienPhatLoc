@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   Box,
   Paper,
@@ -11,6 +11,8 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { useNavigate } from "react-router-dom";
 import Backgourd from "../assets/img/background_screen-login.jpeg";
 import Logo from "../assets/img/logo_TPL.jpeg";
+
+import { useMsal, useIsAuthenticated } from "@azure/msal-react";
 
 const BACKGROUND_IMAGE = Backgourd;
 const LOGO = Logo;
@@ -29,10 +31,26 @@ function MicrosoftLogoIcon(props) {
 
 function RegisterPage() {
   const navigate = useNavigate();
+  const { instance, inProgress, accounts } = useMsal();
+  const isAuthenticated = useIsAuthenticated();
 
+  // 🟢 THÊM useEffect — khi đăng nhập thành công thì đi tới /choose-role
+  useEffect(() => {
+    if (isAuthenticated && inProgress === "none" && accounts.length > 0) {
+      navigate("/choose-role");
+    }
+  }, [isAuthenticated, inProgress, accounts, navigate]);
+
+  // 🟢 HÀM ĐĂNG NHẬP MICROSOFT
   const handleMicrosoftLogin = () => {
-    console.log("Đang chuyển hướng đến trang đăng nhập Microsoft...");
-    navigate("/choose-role");
+    if (inProgress !== "none") return;
+
+    const loginRequest = {
+      scopes: ["user.read"],
+    };
+
+    // Sử dụng redirectUri đúng như trong authConfig (về /register)
+    instance.loginRedirect(loginRequest).catch((e) => console.error(e));
   };
 
   const handleGoBack = () => {

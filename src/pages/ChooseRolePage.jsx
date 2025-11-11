@@ -1,12 +1,5 @@
 import React from "react";
-import {
-  Box,
-  Paper,
-  Button,
-  Typography,
-  IconButton,
-  Container,
-} from "@mui/material";
+import { Box, Paper, Button, Typography, IconButton } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import EngineeringIcon from "@mui/icons-material/Engineering";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
@@ -14,8 +7,10 @@ import InventoryIcon from "@mui/icons-material/Inventory";
 import ConstructionIcon from "@mui/icons-material/Construction";
 import VerifiedUserIcon from "@mui/icons-material/VerifiedUser";
 import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
-import ArchiveIcon from "@mui/icons-material/Archive";
 import { useNavigate } from "react-router-dom";
+import { useMsal } from "@azure/msal-react";
+import { mockUsers } from "../data/mockUsers"; // Import data
+
 import Backgourd from "../assets/img/background_screen-login.jpeg";
 
 const BACKGROUND_IMAGE = Backgourd;
@@ -91,14 +86,49 @@ const SectionTitle = ({ children }) => (
 
 function ChooseRolePage() {
   const navigate = useNavigate();
+  // 1. LẤY THÊM "instance" TỪ useMsal
+  const { accounts, instance } = useMsal();
+
+  const userName = accounts.length > 0 ? accounts[0].name : "Người dùng";
+  const userEmail =
+    accounts.length > 0 ? accounts[0].username.toLowerCase() : null;
 
   const handleGoBack = () => {
-    navigate(-1);
+    console.log("ChooseRolePage: Hủy chọn role, đang đăng xuất...");
+    instance.logoutRedirect({
+      postLogoutRedirectUri: "/login",
+    });
   };
 
   const handleRoleSelect = (role) => {
-    console.log("Đã chọn vai trò:", role);
-    navigate("/");
+    if (!userEmail) {
+      console.error("Không tìm thấy email user. Đang điều hướng về /login");
+      navigate("/login");
+      return;
+    }
+
+    // Tìm user trong data sẵn
+    const userIndex = mockUsers.findIndex(
+      (user) => user.email.toLowerCase() === userEmail
+    );
+
+    if (userIndex !== -1) {
+      // Cập nhật role trong mock data
+      mockUsers[userIndex].role = role;
+      console.log("Cập nhật role cho user:", mockUsers[userIndex]);
+    } else {
+      // Nếu user không có trong list, thêm user mới
+      mockUsers.push({
+        id: mockUsers.length + 1,
+        email: userEmail,
+        name: userName,
+        role: role,
+      });
+      console.log("Đã thêm user mới vào mockUsers:", mockUsers);
+    }
+
+    console.log(`Đã chọn vai trò: ${role} cho ${userEmail}`);
+    navigate("/"); // Chuyển về Dashboard
   };
 
   return (
@@ -120,7 +150,7 @@ function ChooseRolePage() {
         sx={{
           padding: "16px 20px",
           borderRadius: "20px",
-          width: "353px", // Giữ nguyên width
+          width: "353px",
           maxWidth: "450px",
           display: "flex",
           flexDirection: "column",
@@ -128,7 +158,7 @@ function ChooseRolePage() {
           gap: 1,
           boxShadow: "0 20px 60px 0 rgba(0, 0, 0, 0.40)",
           position: "relative",
-          paddingTop: "60px", // Tăng padding top cho nút back
+          paddingTop: "60px",
         }}
       >
         <IconButton
@@ -155,6 +185,13 @@ function ChooseRolePage() {
         >
           CHỌN VAI TRÒ
         </Typography>
+
+        <Typography
+          variant="h6"
+          sx={{ color: "#1C5B41", textAlign: "center", fontSize: "1.1rem" }}
+        >
+          Chào mừng, {userName}!
+        </Typography>
         <Typography
           variant="body2"
           sx={{
@@ -164,10 +201,9 @@ function ChooseRolePage() {
             mb: 1,
           }}
         >
-          Xác thực thành công! Vui lòng chọn vai trò của bạn.
+          Vì đây là lần đăng nhập đầu tiên, vui lòng chọn vai trò của bạn.
         </Typography>
 
-        {/* Danh sách vai trò */}
         <Box sx={{ width: "100%" }}>
           <SectionTitle>VAI TRÒ QUẢN LÝ</SectionTitle>
           <RoleButton
