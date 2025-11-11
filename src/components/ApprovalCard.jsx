@@ -20,6 +20,7 @@ import SaveIcon from "@mui/icons-material/Save";
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { numberToVietnameseWords } from "../changeNum2Word/num2wod.jsx";
+import checktickIcon from "../assets/img/checktickIcon.svg";
 
 const formatDisplayDate = (dateString) => {
   if (!dateString) return "—";
@@ -381,6 +382,11 @@ export default function ApprovalCard() {
         fullWidth
       >
         <DialogContent sx={{ textAlign: "center", py: 4, pt: 5 }}>
+          <img
+            src={checktickIcon}
+            alt="Check tick"
+            style={{ width: "103px", height: "95px" }}
+          />
           <Typography variant="h6" fontWeight="bold" gutterBottom>
             Gửi duyệt thành công!
           </Typography>

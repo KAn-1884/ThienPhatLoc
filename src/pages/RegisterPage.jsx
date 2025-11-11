@@ -4,10 +4,10 @@ import {
   Paper,
   Button,
   Typography,
-  Divider,
   SvgIcon,
+  IconButton,
 } from "@mui/material";
-import PersonAddIcon from "@mui/icons-material/PersonAdd";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { useNavigate } from "react-router-dom";
 import Backgourd from "../assets/img/background_screen-login.jpeg";
 import Logo from "../assets/img/logo_TPL.jpeg";
@@ -15,6 +15,7 @@ import Logo from "../assets/img/logo_TPL.jpeg";
 const BACKGROUND_IMAGE = Backgourd;
 const LOGO = Logo;
 
+// Component Icon Microsoft
 function MicrosoftLogoIcon(props) {
   return (
     <SvgIcon {...props} viewBox="0 0 21 21">
@@ -26,15 +27,16 @@ function MicrosoftLogoIcon(props) {
   );
 }
 
-function LoginPage() {
+function RegisterPage() {
   const navigate = useNavigate();
 
   const handleMicrosoftLogin = () => {
     console.log("Đang chuyển hướng đến trang đăng nhập Microsoft...");
+    navigate("/choose-role");
   };
 
-  const handleGoToRegister = () => {
-    navigate("/register");
+  const handleGoBack = () => {
+    navigate(-1);
   };
 
   return (
@@ -63,13 +65,28 @@ function LoginPage() {
           alignItems: "center",
           gap: 1,
           boxShadow: "0 20px 60px 0 rgba(0, 0, 0, 0.40)",
+          position: "relative",
+          paddingTop: "50px",
         }}
       >
+        <IconButton
+          onClick={handleGoBack}
+          sx={{
+            position: "absolute",
+            top: 16,
+            left: 16,
+            color: "#666",
+            backgroundColor: "#f0f0f0",
+          }}
+        >
+          <ArrowBackIcon />
+        </IconButton>
+
         <Box
           component="img"
           src={LOGO}
           alt="TPL Logo"
-          sx={{ width: "120px", mb: 1, height: "60.75px" }}
+          sx={{ width: "120px", height: "60.75px", mb: 1 }}
         />
         <Typography
           variant="h6"
@@ -81,7 +98,7 @@ function LoginPage() {
             mb: "-7px",
           }}
         >
-          CHÀO MỪNG
+          ĐĂNG KÝ TÀI KHOẢN
         </Typography>
         <Typography
           variant="body2"
@@ -91,65 +108,47 @@ function LoginPage() {
             fontSize: "13px",
           }}
         >
-          Đăng nhập hoặc đăng ký để tiếp tục
+          Đăng nhập bằng tài khoản Microsoft do công ty cấp
         </Typography>
 
         <Box sx={{ width: "100%", mt: "15px" }}>
-          <Box sx={{ mb: 2.5 }}>
-            <Button
-              variant="contained"
-              fullWidth
-              onClick={handleMicrosoftLogin}
-              sx={{
-                backgroundColor: "#fff",
-                "&:hover": {
-                  backgroundColor: "#f5f5f5",
-                  borderColor: "#8C8C8C",
-                },
-                borderRadius: "4px",
-                padding: "12px 0",
-                fontWeight: "bold",
-                textTransform: "none",
-                color: "#5E5E5E",
-                border: "1px solid #8C8C8C",
-                boxShadow: "none",
-              }}
-            >
-              <MicrosoftLogoIcon sx={{ mr: "7.68px" }} />
-              Đăng nhập với Microsoft
-            </Button>
-          </Box>
-
-          <Divider sx={{ width: "100%", mb: 2, mt: 1 }}>
-            <Typography
-              variant="body2"
-              sx={{ color: "#718096", fontSize: "11.8px" }}
-            >
-              hoặc
-            </Typography>
-          </Divider>
-
           <Button
             variant="contained"
             fullWidth
-            onClick={handleGoToRegister}
+            onClick={handleMicrosoftLogin}
             sx={{
-              backgroundColor: "#1C5B41",
-              "&:hover": { backgroundColor: "#154A32" },
-              borderRadius: "10px",
+              backgroundColor: "#fff",
+              "&:hover": {
+                backgroundColor: "#f5f5ff",
+                borderColor: "#8C8C8C",
+              },
+              borderRadius: "4px",
               padding: "12px 0",
               fontWeight: "bold",
               textTransform: "none",
-              boxShadow: "0 4px 15px 0 rgba(45, 95, 63, 0.30)",
+              color: "#5E5E5E",
+              border: "1px solid #8C8C8C",
+              boxShadow: "none",
             }}
           >
-            <PersonAddIcon sx={{ mr: "7.68px" }}></PersonAddIcon>
-            Đăng ký tài khoản mới
+            <MicrosoftLogoIcon sx={{ mr: "7.68px" }} />
+            Đăng nhập với Microsoft
           </Button>
         </Box>
+        <Typography
+          variant="body2"
+          sx={{
+            color: "#718096",
+            textAlign: "center",
+            fontSize: "12.3px",
+            mt: 2,
+          }}
+        >
+          Sau khi xác thực, bạn sẽ chọn vai trò của mình
+        </Typography>
       </Paper>
     </Box>
   );
 }
 
-export default LoginPage;
+export default RegisterPage;
