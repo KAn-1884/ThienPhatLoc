@@ -1,12 +1,45 @@
-import { Box, Card, CardContent, Typography, Chip, Stack } from "@mui/material";
+import {
+  Box,
+  Card,
+  CardContent,
+  Typography,
+  Chip,
+  Stack,
+  Divider,
+} from "@mui/material";
 import EventIcon from "@mui/icons-material/Event";
 import { useNavigate } from "react-router-dom";
 
-const getStatusColor = (status) => {
-  if (status === "Chờ duyệt") return "warning";
-  if (status === "Nháp") return "default";
-  if (status === "Đã duyệt") return "success";
-  return "default";
+// === getStatusStyles (Không thay đổi) ===
+const getStatusStyles = (status) => {
+  // ... (giữ nguyên hàm này)
+  switch (status) {
+    case "Đã duyệt":
+      return {
+        backgroundColor: "#D1FAE5",
+        color: "#065F46",
+        borderRadius: "20px",
+      };
+    case "Chờ duyệt":
+      return {
+        backgroundColor: "#FEF3C7",
+        color: "#92400E",
+        borderRadius: "20px",
+      };
+    case "Từ chối":
+      return {
+        backgroundColor: "#FFF5F5",
+        color: "#C73434",
+        borderRadius: "20px",
+      };
+    case "Nháp":
+    default:
+      return {
+        backgroundColor: "#F4F6F8",
+        color: "#637381",
+        borderRadius: "20px",
+      };
+  }
 };
 
 function ProjectCard({
@@ -18,6 +51,7 @@ function ProjectCard({
   jobCount = 7,
   totalCost = "269.000.000 đ",
   date = "16/10/2025",
+  rejectionReason = null,
 }) {
   const navigate = useNavigate();
 
@@ -37,30 +71,32 @@ function ProjectCard({
         width: "426px",
         textAlign: "left",
         cursor: "pointer",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "space-between",
         "&:hover": {
           boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
           transform: "scale(1.02)",
         },
-        // ===============================================
       }}
     >
       <CardContent
         sx={{
-          padding: "24px",
+          padding: { xs: "16px", md: "24px" },
           height: "100%",
           display: "flex",
           flexDirection: "column",
-          justifyContent: "space-between",
         }}
       >
-        {/* Cụm 1: Tiêu đề */}
-        <Box>
-          {/* ... (Code cũ của Cụm 1 - giữ nguyên) ... */}
+        {/* === CỤM 1: TIÊU ĐỀ === */}
+        <Box sx={{ mb: 2 }}>
+          {/* ... (Nội dung cụm 1 giữ nguyên) ... */}
           <Box
             sx={{
               display: "flex",
+              flexDirection: { xs: "column", sm: "row" },
               justifyContent: "space-between",
-              alignItems: "flex-start",
+              alignItems: { xs: "flex-start", sm: "flex-start" },
               mb: 1.5,
             }}
           >
@@ -76,19 +112,33 @@ function ProjectCard({
                 {formId}
               </Typography>
             </Box>
-            <Chip label={status} color={getStatusColor(status)} size="small" />
+            <Chip
+              label={status}
+              size="small"
+              sx={{
+                height: "24px",
+                fontSize: "0.75rem",
+                fontWeight: "bold",
+                borderRadius: "6px",
+                padding: "0 2px",
+                ...getStatusStyles(status),
+                mt: { xs: 1, sm: 0 },
+              }}
+            />
           </Box>
         </Box>
 
-        <Box sx={{ mb: 2 }}>
+        {/* === CỤM 2: NỘI DUNG CHÍNH === */}
+        <Box sx={{ flexGrow: 1 }}>
           {/* Hàng Địa điểm */}
           <Box
             sx={{
               display: "flex",
+              flexDirection: { xs: "column", sm: "row" },
               justifyContent: "space-between",
               alignItems: "flex-start",
-              mb: 1,
-              gap: 2,
+              // mb: 1, // Bỏ mb ở đây để Divider kiểm soát khoảng cách
+              gap: { xs: 0, sm: 2 },
             }}
           >
             <Typography
@@ -100,36 +150,37 @@ function ProjectCard({
             <Typography
               variant="body2"
               sx={{
-                textAlign: "right",
+                textAlign: { xs: "left", sm: "right" },
                 color: "#2D3748",
                 fontWeight: "bold",
                 wordBreak: "break-word",
-                maxWidth: "300px",
+                maxWidth: { xs: "100%", sm: "300px" },
               }}
             >
               {address}
             </Typography>
           </Box>
 
+          {/* === THÊM DIVIDER 1 === */}
+          <Divider sx={{ my: 1, borderColor: "rgba(0,0,0,0.05)" }} />
+
           {/* Hàng Số công việc */}
           <Box
             sx={{
               display: "flex",
               justifyContent: "space-between",
-              mb: 1,
+              // mb: 1, // Bỏ mb ở đây
             }}
           >
             <Typography variant="body2" sx={{ color: "#718096" }}>
               Số công việc:
             </Typography>
-            <Typography
-              variant="body2"
-              color="text.secondary"
-              sx={{ color: "#2D3748" }}
-            >
+            <Typography variant="body2" sx={{ color: "#2D3748" }}>
               {jobCount}
             </Typography>
           </Box>
+
+          <Divider sx={{ my: 1, borderColor: "rgba(0,0,0,0.05)" }} />
 
           {/* Hàng Tổng chi phí */}
           <Box
@@ -146,17 +197,45 @@ function ProjectCard({
             </Typography>
           </Box>
         </Box>
+        {/* === KẾT THÚC CỤM 2 === */}
 
-        {/* Cụm 3: Ngày tháng */}
-        <Stack
-          direction="row"
-          alignItems="center"
-          spacing={1}
-          color="text.secondary"
-        >
-          <EventIcon sx={{ fontSize: "1.1rem" }} />
-          <Typography variant="body2">{date}</Typography>
-        </Stack>
+        <Divider sx={{ my: 1, borderColor: "rgba(0,0,0,0.05)" }} />
+
+        {/* === CỤM 3: LÝ DO TỪ CHỐI (Điều kiện) === */}
+        {status === "Từ chối" && rejectionReason && (
+          <>
+            <Box
+              sx={{
+                backgroundColor: "#FFF5F5",
+                color: "#C73434",
+                borderRadius: "8px",
+                p: "12px 16px",
+              }}
+            >
+              <Typography variant="body2" sx={{ fontWeight: "bold", mb: 0.5 }}>
+                Lý do từ chối:
+              </Typography>
+              <Typography variant="body2" sx={{ wordBreak: "break-word" }}>
+                {rejectionReason}
+              </Typography>
+            </Box>
+
+            <Divider sx={{ my: 1.5, borderColor: "rgba(0,0,0,0.05)" }} />
+          </>
+        )}
+
+        {/* === CỤM 4: FOOTER === */}
+        <Box>
+          <Stack
+            direction="row"
+            alignItems="center"
+            spacing={1}
+            color="text.secondary"
+          >
+            <EventIcon sx={{ fontSize: "1.1rem" }} />
+            <Typography variant="body2">{date}</Typography>
+          </Stack>
+        </Box>
       </CardContent>
     </Card>
   );

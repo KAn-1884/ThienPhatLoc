@@ -1,4 +1,6 @@
-import { useNavigate, NavLink, Outlet } from "react-router-dom";
+// File: src/pages/DashboardPage.jsx
+
+import { useNavigate, Outlet, useLocation } from "react-router-dom";
 import {
   AppBar,
   Box,
@@ -11,24 +13,35 @@ import {
   Menu,
   MenuItem,
   useMediaQuery,
+  Badge,
+  Divider,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
-import MenuIcon from "@mui/icons-material/Menu";
-import ArticleIcon from "@mui/icons-material/Article";
 import FactCheckOutlinedIcon from "@mui/icons-material/FactCheckOutlined";
-import Logo from "../assets/img/logo_TPL.jpeg";
+import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
+import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown"; // <-- IMPORT MỚI
+import Logo from "../assets/img/logo_TPL.jpeg"; // Giả định path này đúng
 import React, { useEffect, useState } from "react";
 import { useMsal, useIsAuthenticated } from "@azure/msal-react";
 
+import { projectData } from "../data/projectData";
+
 function DashboardPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { instance, accounts, inProgress } = useMsal();
   const isAuthenticated = useIsAuthenticated();
   const isMobile = useMediaQuery("(max-width:900px)");
 
-  const [anchorEl, setAnchorEl] = useState(null);
-  const handleMenuOpen = (e) => setAnchorEl(e.currentTarget);
-  const handleMenuClose = () => setAnchorEl(null);
+  // --- State cho Mobile Nav Menu ---
+  const [mobileNavAnchorEl, setMobileNavAnchorEl] = useState(null);
+  const handleMobileNavOpen = (e) => setMobileNavAnchorEl(e.currentTarget);
+  const handleMobileNavClose = () => setMobileNavAnchorEl(null);
+
+  // --- State cho User Profile Menu (Desktop) ---
+  const [userMenuAnchorEl, setUserMenuAnchorEl] = useState(null);
+  const handleUserMenuOpen = (e) => setUserMenuAnchorEl(e.currentTarget);
+  const handleUserMenuClose = () => setUserMenuAnchorEl(null);
 
   const userName = accounts.length > 0 ? accounts[0].name : "User";
   const userInitials =
@@ -49,6 +62,10 @@ function DashboardPage() {
       postLogoutRedirectUri: "/login",
     });
   };
+
+  const projectsToApproveCount = projectData.filter(
+    (p) => p.status === "Chờ duyệt"
+  ).length;
 
   if (inProgress !== "none") {
     return (
@@ -73,10 +90,24 @@ function DashboardPage() {
   if (!isAuthenticated) return null;
 
   const navItems = [
-    { label: "Duyệt dự án", to: "approve", icon: <FactCheckOutlinedIcon /> },
-    { label: "Danh sách dự án", to: "/", icon: null },
-    { label: "Tạo mới", to: "createPage", icon: <AddIcon /> },
-    // { label: "Tài liệu", to: "documents", icon: <ArticleIcon /> },
+    {
+      label: "Duyệt dự án",
+      to: "/approval",
+      icon: <FactCheckOutlinedIcon />,
+      badgeContent: projectsToApproveCount,
+    },
+    {
+      label: "Danh sách dự án",
+      to: "/",
+      icon: <HomeOutlinedIcon />,
+      badgeContent: 0,
+    },
+    {
+      label: "Tạo mới",
+      to: "/createPage",
+      icon: <AddIcon />,
+      badgeContent: 0,
+    },
   ];
 
   return (
@@ -85,7 +116,8 @@ function DashboardPage() {
         display: "flex",
         flexDirection: "column",
         minWidth: "375px",
-        minHeight: "667px",
+        minHeight: "100vh",
+        backgroundColor: "#F7FAFC",
       }}
     >
       <AppBar
@@ -98,89 +130,187 @@ function DashboardPage() {
         }}
       >
         <Toolbar>
-          {isMobile && (
-            <IconButton onClick={handleMenuOpen} sx={{ mr: 1 }}>
-              <MenuIcon sx={{ color: "#1C5B41" }} />
-            </IconButton>
-          )}
-
           <Box
             component="img"
             src={Logo}
             alt="TPL Logo"
-            sx={{ width: 40, height: 40, mr: 1.5 }}
+            sx={{ width: 40, height: 40, mr: 1.5, cursor: "pointer" }}
+            onClick={() => navigate("/")}
           />
-          <Typography variant="h6" sx={{ fontWeight: "bold" }}>
+          <Typography
+            variant="h6"
+            sx={{ fontWeight: "bold", flexGrow: { xs: 1, md: 0 } }}
+          >
             Thiên Phát Lộc E&C
           </Typography>
 
-          <Box sx={{ flexGrow: 1 }} />
+          {!isMobile && <Box sx={{ flexGrow: 1 }} />}
 
-          {!isMobile && (
-            <>
-              {navItems.map(({ label, to, icon }) => (
-                <NavLink key={to} to={to}>
-                  {({ isActive }) => (
-                    <Button
-                      variant="contained"
-                      startIcon={icon}
-                      sx={{
-                        mr: 2,
-                        textTransform: "none",
-                        borderRadius: "8px",
-                        borderColor: "#1C5B41",
-                        backgroundColor: isActive ? "#1C5B41" : "#fff",
-                        color: isActive ? "#fff" : "#1C5B41",
-                        "&:hover": {
-                          backgroundColor: isActive ? "#154A32" : "#f0f0f0",
-                        },
-                      }}
-                    >
-                      {label}
-                    </Button>
-                  )}
-                </NavLink>
-              ))}
-              <IconButton onClick={handleLogout}>
-                <Avatar sx={{ backgroundColor: "#1C5B41" }}>
-                  {userInitials}
-                </Avatar>
-              </IconButton>
-            </>
-          )}
-
+          {/* === NÚT AVATAR TRÊN MOBILE === */}
           {isMobile && (
-            <IconButton onClick={handleMenuOpen}>
+            <IconButton onClick={handleMobileNavOpen} sx={{ ml: "auto" }}>
               <Avatar sx={{ backgroundColor: "#1C5B41" }}>
                 {userInitials}
               </Avatar>
             </IconButton>
           )}
+
+          {/* === CÁC NÚT ĐIỀU HƯỚNG TRÊN DESKTOP === */}
+          {!isMobile && (
+            <>
+              {navItems.map(({ label, to, icon, badgeContent }) => {
+                let isActive = false;
+                if (to === "/") {
+                  isActive =
+                    location.pathname === "/" ||
+                    location.pathname.startsWith("/project/");
+                } else if (to === "/approval") {
+                  isActive =
+                    location.pathname === to ||
+                    location.pathname.startsWith("/approval/");
+                } else {
+                  isActive = location.pathname === to;
+                }
+
+                return (
+                  <Button
+                    key={to}
+                    onClick={() => navigate(to)}
+                    variant={isActive ? "contained" : "text"}
+                    startIcon={
+                      <Badge badgeContent={badgeContent} color="error">
+                        {icon}
+                      </Badge>
+                    }
+                    sx={{
+                      mr: 1.5,
+                      textTransform: "none",
+                      borderRadius: "8px",
+                      bgcolor: isActive ? "#1C5B41" : "transparent",
+                      color: isActive ? "#fff" : "#333",
+                      "&:hover": {
+                        bgcolor: isActive ? "#154A32" : "#f0f0f0",
+                      },
+                    }}
+                  >
+                    {label}
+                  </Button>
+                );
+              })}
+
+              {/* === NÚT AVATAR TRÊN DESKTOP (CÓ DROPDOWN) === */}
+              <Button
+                onClick={handleUserMenuOpen}
+                sx={{
+                  textTransform: "none",
+                  color: "#333",
+                  borderRadius: "8px",
+                  p: "4px 8px", // Thêm padding
+                  "&:hover": {
+                    bgcolor: "#f0f0f0",
+                  },
+                }}
+              >
+                <Avatar
+                  sx={{
+                    width: 32,
+                    height: 32,
+                    backgroundColor: "#1C5B41",
+                    mr: 1,
+                  }}
+                >
+                  {userInitials}
+                </Avatar>
+                <Typography
+                  sx={{
+                    display: { xs: "none", md: "block" },
+                    fontWeight: 600,
+                    mr: 0.5,
+                  }}
+                ></Typography>
+                <ArrowDropDownIcon />
+              </Button>
+            </>
+          )}
         </Toolbar>
 
+        {/* === MENU NGƯỜI DÙNG (CHO DESKTOP) === */}
         <Menu
-          anchorEl={anchorEl}
-          open={Boolean(anchorEl)}
-          onClose={handleMenuClose}
+          anchorEl={userMenuAnchorEl}
+          open={Boolean(userMenuAnchorEl)}
+          onClose={handleUserMenuClose}
+          anchorOrigin={{
+            vertical: "bottom",
+            horizontal: "right",
+          }}
+          transformOrigin={{
+            vertical: "top",
+            horizontal: "right",
+          }}
+          sx={{ mt: 1 }}
+        >
+          <MenuItem disabled sx={{ opacity: "1 !important" }}>
+            <Typography variant="body1" sx={{ fontWeight: 600 }}>
+              {userName}
+            </Typography>
+          </MenuItem>
+          <Divider />
+          <MenuItem
+            onClick={() => {
+              handleUserMenuClose();
+              // navigate("/profile"); // Thêm hành động nếu muốn
+            }}
+          >
+            Hồ sơ của tôi
+          </MenuItem>
+          <MenuItem
+            onClick={() => {
+              handleUserMenuClose();
+              // navigate("/settings"); // Thêm hành động nếu muốn
+            }}
+          >
+            Cài đặt
+          </MenuItem>
+          <Divider />
+          <MenuItem
+            onClick={() => {
+              handleLogout();
+              handleUserMenuClose();
+            }}
+          >
+            Đăng xuất
+          </MenuItem>
+        </Menu>
+
+        {/* === MENU ĐIỀU HƯỚNG (CHO MOBILE) === */}
+        <Menu
+          anchorEl={mobileNavAnchorEl}
+          open={Boolean(mobileNavAnchorEl)}
+          onClose={handleMobileNavClose}
         >
           {navItems.map((item) => (
             <MenuItem
               key={item.to}
               onClick={() => {
                 navigate(item.to);
-                handleMenuClose();
+                handleMobileNavClose();
               }}
             >
               {item.icon && (
-                <Box sx={{ mr: 1, display: "flex" }}>{item.icon}</Box>
+                <Box sx={{ mr: 1.5, display: "flex" }}>
+                  <Badge badgeContent={item.badgeContent} color="error">
+                    {item.icon}
+                  </Badge>
+                </Box>
               )}
               {item.label}
             </MenuItem>
           ))}
+          <Divider />
           <MenuItem
             onClick={() => {
               handleLogout();
-              handleMenuClose();
+              handleMobileNavClose();
             }}
           >
             Đăng xuất

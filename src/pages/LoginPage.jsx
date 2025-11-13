@@ -71,9 +71,9 @@ function LoginPage() {
     instance.loginRedirect(loginRequest).catch((e) => console.error(e));
   };
 
-  const handleGoToRegister = () => {
-    navigate("/register");
-  };
+  // const handleGoToRegister = () => {
+  //   navigate("/register");
+  // };
 
   if (inProgress !== "none") {
     return (
@@ -179,16 +179,16 @@ function LoginPage() {
             </Button>
           </Box>
 
-          <Divider sx={{ width: "100%", mb: 2, mt: 1 }}>
+          {/* <Divider sx={{ width: "100%", mb: 2, mt: 1 }}>
             <Typography
               variant="body2"
               sx={{ color: "#718096", fontSize: "11.8px" }}
             >
               hoặc
             </Typography>
-          </Divider>
+          </Divider> */}
 
-          <Button
+          {/* <Button
             variant="contained"
             fullWidth
             onClick={handleGoToRegister}
@@ -204,7 +204,7 @@ function LoginPage() {
           >
             <PersonAddIcon sx={{ mr: "7.68px" }}></PersonAddIcon>
             Đăng ký tài khoản mới
-          </Button>
+          </Button> */}
         </Box>
       </Paper>
     </Box>

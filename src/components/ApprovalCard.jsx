@@ -18,9 +18,12 @@ import {
 } from "@mui/material";
 import SaveIcon from "@mui/icons-material/Save";
 import { useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+// === 1. CẬP NHẬT IMPORT ===
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { numberToVietnameseWords } from "../changeNum2Word/num2wod.jsx";
 import checktickIcon from "../assets/img/checktickIcon.svg";
+// === 2. IMPORT DATA MỚI ===
+import { getApprovalData } from "../data/approvalMockData.js";
 
 const formatDisplayDate = (dateString) => {
   if (!dateString) return "—";
@@ -46,9 +49,22 @@ const InfoRow = ({ label, value }) => (
 export default function ApprovalCard() {
   const location = useLocation();
   const navigate = useNavigate();
+  // === 3. LẤY ID TỪ URL ===
+  const { projectId } = useParams();
 
-  const { formData, workItems, totalCost, approvalState } =
-    location.state || {};
+  // === 4. LOGIC LẤY DATA MỚI ===
+  // 1. Thử lấy data từ state (khi đi từ trang Create, nếu có)
+  let data = location.state;
+
+  // 2. Nếu không có state, VÀ có projectId (khi đi từ trang Approval)
+  if (!data && projectId) {
+    // Tải data "fake" từ file mock
+    data = getApprovalData(projectId);
+  }
+
+  // 3. Bóc tách data (nếu data tồn tại)
+  const { formData, workItems, totalCost, approvalState } = data || {};
+  // =========================
 
   const [openSubmitDialog, setOpenSubmitDialog] = useState(false);
   const [openSuccessDialog, setOpenSuccessDialog] = useState(false);
@@ -58,7 +74,7 @@ export default function ApprovalCard() {
 
   const handleCloseSuccess = () => {
     setOpenSuccessDialog(false);
-    navigate("/");
+    navigate("/"); // Về trang chủ
   };
 
   const handleConfirmSubmit = () => {
@@ -77,11 +93,15 @@ export default function ApprovalCard() {
   if (!formData) {
     return (
       <Container sx={{ py: 10, textAlign: "center" }}>
-        <Typography>Bạn chưa nhập dữ liệu biểu mẫu.</Typography>
+        <Typography>
+          {projectId
+            ? `Không tìm thấy dữ liệu duyệt cho dự án ID: ${projectId}`
+            : "Bạn chưa nhập dữ liệu biểu mẫu."}
+        </Typography>
         <Button
           variant="contained"
           sx={{ mt: 2, backgroundColor: "#1C5B41" }}
-          onClick={() => navigate(-1)}
+          onClick={() => navigate(-1)} // Quay lại
         >
           Quay lại
         </Button>
@@ -90,6 +110,7 @@ export default function ApprovalCard() {
   }
 
   return (
+    // Phần JSX còn lại giữ nguyên
     <Box sx={{ backgroundColor: "#f9fafb", minHeight: "100vh" }}>
       <Container maxWidth="lg" sx={{ py: 4 }}>
         <Paper
@@ -308,32 +329,35 @@ export default function ApprovalCard() {
         </Paper>
 
         {/* --- Nút hành động --- */}
-        <Box
-          textAlign="center"
-          mt={3}
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            gap: 1.5,
-          }}
-        >
-          <Button
-            variant="contained"
-            startIcon={<SaveIcon />}
+        {/* Chỉ hiển thị nút 'Gửi duyệt' nếu đây là phiếu mới (không có projectId) */}
+        {!projectId && (
+          <Box
+            textAlign="center"
+            mt={3}
             sx={{
-              backgroundColor: "#1C5B41",
-              textTransform: "none",
-              px: 4,
-              py: 1.2,
-              fontWeight: 600,
-              "&:hover": { backgroundColor: "#154A32" },
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: 1.5,
             }}
-            onClick={handleOpenSubmit}
           >
-            Gửi duyệt
-          </Button>
-        </Box>
+            <Button
+              variant="contained"
+              startIcon={<SaveIcon />}
+              sx={{
+                backgroundColor: "#1C5B41",
+                textTransform: "none",
+                px: 4,
+                py: 1.2,
+                fontWeight: 600,
+                "&:hover": { backgroundColor: "#154A32" },
+              }}
+              onClick={handleOpenSubmit}
+            >
+              Gửi duyệt
+            </Button>
+          </Box>
+        )}
       </Container>
 
       {/* --- Dialog 1: Xác nhận gửi --- */}
