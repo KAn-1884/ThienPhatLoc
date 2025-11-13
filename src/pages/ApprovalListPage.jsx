@@ -2,19 +2,12 @@
 
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  Box,
-  Typography,
-  Button,
-  Grid,
-  Chip,
-  Paper,
-  Divider,
-} from "@mui/material";
+import { Box, Typography, Button, Paper, Chip } from "@mui/material";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import CancelOutlinedIcon from "@mui/icons-material/CancelOutlined";
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import { projectsToApprove } from "../data/approvalMockData.js";
+
 const ApprovalCard = ({ project, navigate }) => {
   const handleApproveQuick = () => {
     alert(`Dự án "${project.name}" (ID: ${project.id}) ĐÃ ĐƯỢC DUYỆT NHANH!`);
@@ -64,7 +57,7 @@ const ApprovalCard = ({ project, navigate }) => {
         }}
       />
 
-      {/* KHU VỰC THÔNG TIN (4 CỘT BẰNG NHAU - 25% WIDTH) */}
+      {/* KHU VỰC THÔNG TIN (Responsive) */}
       <Box
         sx={{
           bgcolor: "#F7FAFC",
@@ -77,7 +70,7 @@ const ApprovalCard = ({ project, navigate }) => {
         <Box
           sx={{
             display: "flex",
-            flexWrap: "wrap", // Cho phép xuống hàng
+            flexWrap: "wrap",
             alignItems: "flex-start",
             justifyContent: "flex-start",
           }}
@@ -85,9 +78,10 @@ const ApprovalCard = ({ project, navigate }) => {
           {/* Block 1: Địa điểm */}
           <Box
             sx={{
-              width: "25%", // Mỗi block chiếm 25%
+              width: { xs: "100%", sm: "100%", md: "50%", lg: "25%" },
               pr: 2,
               boxSizing: "border-box",
+              mb: { xs: 1.5, md: 0 },
             }}
           >
             <Typography variant="body2" color="text.secondary">
@@ -108,9 +102,10 @@ const ApprovalCard = ({ project, navigate }) => {
           {/* Block 2: Số hạng mục */}
           <Box
             sx={{
-              width: "25%",
+              width: { xs: "100%", sm: "100%", md: "50%", lg: "25%" },
               pr: 2,
               boxSizing: "border-box",
+              mb: { xs: 1.5, md: 0 },
             }}
           >
             <Typography variant="body2" color="text.secondary">
@@ -124,9 +119,10 @@ const ApprovalCard = ({ project, navigate }) => {
           {/* Block 3: Tổng chi phí */}
           <Box
             sx={{
-              width: "25%",
+              width: { xs: "100%", sm: "100%", md: "50%", lg: "25%" },
               pr: 2,
               boxSizing: "border-box",
+              mb: { xs: 1.5, md: 0 },
             }}
           >
             <Typography variant="body2" color="text.secondary">
@@ -140,9 +136,10 @@ const ApprovalCard = ({ project, navigate }) => {
           {/* Block 4: Ngày tạo */}
           <Box
             sx={{
-              width: "25%",
+              width: { xs: "100%", sm: "100%", md: "50%", lg: "25%" },
               pr: 2,
               boxSizing: "border-box",
+              mb: { xs: 1.5, md: 0 },
             }}
           >
             <Typography variant="body2" color="text.secondary">
@@ -155,14 +152,27 @@ const ApprovalCard = ({ project, navigate }) => {
         </Box>
       </Box>
 
-      {/* Nút hành động */}
-      <Box sx={{ display: "flex", alignItems: "center" }}>
+      {/* Nút hành động (ĐÃ CẬP NHẬT THEO ẢNH MỚI) */}
+      <Box
+        sx={{
+          display: "flex",
+          // Luôn xếp chồng các nút lên nhau trên mobile (xs)
+          flexDirection: { xs: "column", md: "row" },
+          gap: 1.5, // Giữ khoảng cách giữa các nút
+          alignItems: { xs: "stretch", md: "center" }, // Kéo dãn các nút con trên mobile
+        }}
+      >
+        {/* Box chứa 2 nút Duyệt và Từ chối */}
         <Box
           sx={{
             display: "flex",
             gap: 1.5,
-            alignItems: "center",
-            width: "85%",
+            // Trên mobile, 2 nút này cũng xếp chồng lên nhau
+            flexDirection: { xs: "column", md: "row" },
+            // Chiếm 100% chiều rộng trên mobile, giữ 85% trên desktop
+            width: { xs: "100%", md: "85%" },
+            // Trên mobile, các nút con tự kéo dãn để chiếm toàn bộ Box cha
+            "& > button": { flex: { xs: "none", md: 1 } }, // Button con không dùng flex:1 trên mobile nữa
           }}
         >
           <Button
@@ -174,9 +184,11 @@ const ApprovalCard = ({ project, navigate }) => {
               color: "#FFF",
               textTransform: "none",
               fontWeight: "bold",
-              flex: 1,
+              // Flex:1 trên desktop, nhưng không còn trên mobile để nó tự co dãn 100%
+              flex: { xs: "none", md: 1 },
               borderRadius: "8px",
               "&:hover": { backgroundColor: "#154A32" },
+              width: { xs: "100%", md: "auto" }, // Đảm bảo chiếm 100% trên mobile
             }}
           >
             Duyệt dự án
@@ -189,28 +201,39 @@ const ApprovalCard = ({ project, navigate }) => {
             sx={{
               textTransform: "none",
               fontWeight: "bold",
-              flex: 1,
+              // Flex:1 trên desktop, nhưng không còn trên mobile
+              flex: { xs: "none", md: 1 },
               border: "2px solid #E53E3E",
               borderRadius: "8px",
+              width: { xs: "100%", md: "auto" }, // Đảm bảo chiếm 100% trên mobile
             }}
           >
             Từ chối
           </Button>
         </Box>
 
-        <Box sx={{ flex: 1, ml: 1.5 }}>
+        {/* Box chứa nút Xem chi tiết */}
+        <Box
+          sx={{
+            // Trên mobile, box này chiếm 100%
+            width: { xs: "100%", md: "auto" },
+            // Bỏ ml trên mobile
+            ml: { xs: 0, md: 1.5 },
+            // Trên desktop, nó sẽ co lại theo nội dung
+            flex: { xs: "none", md: 1 },
+          }}
+        >
           <Button
             variant="text"
             startIcon={<VisibilityOutlinedIcon />}
             onClick={() => navigate(`/approval/${project.id}`)}
             sx={{
-              ml: "auto",
               fontWeight: "bold",
               textTransform: "none",
               color: "#2D5F3F",
               justifyContent: "center",
               backgroundColor: "#E2E8F0",
-              width: "100%",
+              width: "100%", // Luôn chiếm 100% của Box cha
               borderRadius: "8px",
               "&:hover": { bgcolor: "#e4e4e4ff" },
             }}
@@ -246,6 +269,7 @@ export default function ApprovalListPage() {
       >
         Duyệt dự án
       </Typography>
+
       {projectsToApprove.length === 0 ? (
         <Paper
           elevation={1}

@@ -10,34 +10,29 @@ import {
 import EventIcon from "@mui/icons-material/Event";
 import { useNavigate } from "react-router-dom";
 
-// === getStatusStyles (Không thay đổi) ===
+// === getStatusStyles ===
 const getStatusStyles = (status) => {
-  // ... (giữ nguyên hàm này)
   switch (status) {
     case "Đã duyệt":
       return {
         backgroundColor: "#D1FAE5",
         color: "#065F46",
-        borderRadius: "20px",
       };
     case "Chờ duyệt":
       return {
         backgroundColor: "#FEF3C7",
         color: "#92400E",
-        borderRadius: "20px",
       };
     case "Từ chối":
       return {
         backgroundColor: "#FFF5F5",
         color: "#C73434",
-        borderRadius: "20px",
       };
     case "Nháp":
     default:
       return {
         backgroundColor: "#F4F6F8",
         color: "#637381",
-        borderRadius: "20px",
       };
   }
 };
@@ -59,6 +54,20 @@ function ProjectCard({
     navigate(`/project/${id}`);
   };
 
+  const labelStyles = {
+    color: "#718096",
+    flexShrink: 0,
+    minWidth: "90px",
+    textAlign: "left",
+    lineHeight: 1.5,
+  };
+
+  const rowBoxStyles = {
+    display: "flex",
+    flexDirection: "row",
+    gap: 2,
+  };
+
   return (
     <Card
       variant="outlined"
@@ -68,7 +77,8 @@ function ProjectCard({
         borderColor: "rgba(45, 95, 63, 0.65)",
         borderWidth: "1.5px",
         height: "100%",
-        width: "426px",
+        width: { xs: "100%", sm: "360px", md: "426px" },
+        maxWidth: { xs: "410px" },
         textAlign: "left",
         cursor: "pointer",
         display: "flex",
@@ -90,13 +100,12 @@ function ProjectCard({
       >
         {/* === CỤM 1: TIÊU ĐỀ === */}
         <Box sx={{ mb: 2 }}>
-          {/* ... (Nội dung cụm 1 giữ nguyên) ... */}
           <Box
             sx={{
               display: "flex",
-              flexDirection: { xs: "column", sm: "row" },
+              flexDirection: "row",
               justifyContent: "space-between",
-              alignItems: { xs: "flex-start", sm: "flex-start" },
+              alignItems: "flex-start",
               mb: 1.5,
             }}
           >
@@ -122,60 +131,59 @@ function ProjectCard({
                 borderRadius: "6px",
                 padding: "0 2px",
                 ...getStatusStyles(status),
-                mt: { xs: 1, sm: 0 },
               }}
             />
           </Box>
         </Box>
 
-        {/* === CỤM 2: NỘI DUNG CHÍNH === */}
+        {/* === CỤM 2: NỘI DUNG CHÍNH  === */}
         <Box sx={{ flexGrow: 1 }}>
           {/* Hàng Địa điểm */}
           <Box
             sx={{
-              display: "flex",
-              flexDirection: { xs: "column", sm: "row" },
-              justifyContent: "space-between",
+              ...rowBoxStyles,
               alignItems: "flex-start",
-              // mb: 1, // Bỏ mb ở đây để Divider kiểm soát khoảng cách
-              gap: { xs: 0, sm: 2 },
             }}
           >
-            <Typography
-              variant="body2"
-              sx={{ color: "#718096", flexShrink: 0 }}
-            >
+            <Typography variant="body2" sx={labelStyles}>
               Địa điểm:
             </Typography>
             <Typography
               variant="body2"
               sx={{
-                textAlign: { xs: "left", sm: "right" },
+                textAlign: "right",
                 color: "#2D3748",
                 fontWeight: "bold",
                 wordBreak: "break-word",
-                maxWidth: { xs: "100%", sm: "300px" },
+                flex: 1,
+                lineHeight: 1.5,
               }}
             >
               {address}
             </Typography>
           </Box>
 
-          {/* === THÊM DIVIDER 1 === */}
           <Divider sx={{ my: 1, borderColor: "rgba(0,0,0,0.05)" }} />
 
           {/* Hàng Số công việc */}
           <Box
             sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              // mb: 1, // Bỏ mb ở đây
+              ...rowBoxStyles,
+              alignItems: "center", // 'center' vì nội dung 1 dòng
             }}
           >
-            <Typography variant="body2" sx={{ color: "#718096" }}>
+            <Typography variant="body2" sx={labelStyles}>
               Số công việc:
             </Typography>
-            <Typography variant="body2" sx={{ color: "#2D3748" }}>
+            <Typography
+              variant="body2"
+              sx={{
+                color: "#2D3748",
+                flex: 1,
+                textAlign: "right",
+                lineHeight: 1.5,
+              }}
+            >
               {jobCount}
             </Typography>
           </Box>
@@ -185,23 +193,30 @@ function ProjectCard({
           {/* Hàng Tổng chi phí */}
           <Box
             sx={{
-              display: "flex",
-              justifyContent: "space-between",
+              ...rowBoxStyles,
+              alignItems: "center", // 'center' vì nội dung 1 dòng
             }}
           >
-            <Typography variant="body2" sx={{ color: "#718096" }}>
+            <Typography variant="body2" sx={labelStyles}>
               Tổng chi phí:
             </Typography>
-            <Typography sx={{ fontWeight: "bold", color: "#2D5F3F" }}>
+            <Typography
+              sx={{
+                fontWeight: "bold",
+                color: "#2D5F3F",
+                flex: 1,
+                textAlign: "right",
+                lineHeight: 1.5,
+              }}
+            >
               {totalCost}
             </Typography>
           </Box>
         </Box>
-        {/* === KẾT THÚC CỤM 2 === */}
 
         <Divider sx={{ my: 1, borderColor: "rgba(0,0,0,0.05)" }} />
 
-        {/* === CỤM 3: LÝ DO TỪ CHỐI (Điều kiện) === */}
+        {/* === CỤM 3: LÝ DO TỪ CHỐI === */}
         {status === "Từ chối" && rejectionReason && (
           <>
             <Box

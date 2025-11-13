@@ -1,6 +1,4 @@
-//
-// File: src/components/DashboardHome.jsx
-//
+import React, { useState, useMemo } from "react";
 import {
   Box,
   Typography,
@@ -8,20 +6,19 @@ import {
   Button,
   TextField,
   InputAdornment,
+  // useMediaQuery, // <-- KHÔNG CẦN DÙNG NỮA
 } from "@mui/material";
 import { Search as SearchIcon, Add as AddIcon } from "@mui/icons-material";
-import { useState, useMemo } from "react";
 
-// Import các component và data
 import ProjectCard from "./ProjectCard.jsx";
-import Status from "./Status.jsx"; // Đảm bảo file Status.jsx của bạn đã đúng
+import Status from "./Status.jsx";
 import { projectData } from "../data/projectData.js";
 
 export default function DashboardHome() {
-  // === LOGIC STATE VÀ LỌC (Giữ nguyên, đã đúng) ===
   const [selectedStatus, setSelectedStatus] = useState("Tất cả");
 
   const statusCounts = useMemo(() => {
+    // ... (Giữ nguyên)
     const counts = {
       "Tất cả": projectData.length,
       Nháp: 0,
@@ -29,40 +26,38 @@ export default function DashboardHome() {
       "Đã duyệt": 0,
       "Từ chối": 0,
     };
-
     projectData.forEach((project) => {
       if (Object.prototype.hasOwnProperty.call(counts, project.status)) {
         counts[project.status]++;
       }
     });
-
     return counts;
-  }, [projectData]);
+  }, []);
 
   const filteredProjects = useMemo(() => {
-    if (selectedStatus === "Tất cả") {
-      return projectData;
-    }
+    // ... (Giữ nguyên)
+    if (selectedStatus === "Tất cả") return projectData;
     return projectData.filter((project) => project.status === selectedStatus);
-  }, [selectedStatus, projectData]);
+  }, [selectedStatus]);
 
-  // === PHẦN RENDER ===
   return (
     <Box
       sx={{
+        // ... (Box cha giữ nguyên)
         display: "flex",
         flexDirection: "column",
         alignItems: "stretch",
         backgroundColor: "#FFF",
         padding: { xs: 1.5, md: 3 },
-        borderRadius: "12px",
+        borderRadius: { xs: 0, md: "12px" },
         width: "100%",
         maxWidth: "100%",
         overflowX: "hidden",
         boxSizing: "border-box",
+        minHeight: "100%",
       }}
     >
-      {/* === PHẦN HEADER (Đã đúng) === */}
+      {/* HEADER (Giữ nguyên) */}
       <Box
         sx={{
           display: "flex",
@@ -73,15 +68,10 @@ export default function DashboardHome() {
           gap: 2,
         }}
       >
-        <Typography
-          variant="h5"
-          sx={{
-            fontWeight: "bold",
-            color: "#2D3748",
-          }}
-        >
+        <Typography variant="h5" sx={{ fontWeight: "bold", color: "#2D3748" }}>
           Danh sách dự án
         </Typography>
+        {/* ... Button (Giữ nguyên) ... */}
         <Button
           variant="contained"
           startIcon={
@@ -101,17 +91,16 @@ export default function DashboardHome() {
             fontWeight: "bold",
             borderRadius: "8px",
             padding: "8px 16px",
-            "&:hover": {
-              backgroundColor: "#154A32",
-            },
+            "&:hover": { backgroundColor: "#154A32" },
           }}
         >
           Nhập dự án mới
         </Button>
       </Box>
 
-      {/* === PHẦN TÌM KIẾM (Đã đúng) === */}
+      {/* TÌM KIẾM (Giữ nguyên) */}
       <Box sx={{ mb: 3, width: "100%", maxWidth: "500px" }}>
+        {/* ... TextField (Giữ nguyên) ... */}
         <TextField
           placeholder="Tìm kiếm tên dự án..."
           variant="outlined"
@@ -134,27 +123,39 @@ export default function DashboardHome() {
         />
       </Box>
 
-      {/* === PHẦN STATUS (Đã đúng) === */}
+      {/* STATUS FILTER (Giữ nguyên) */}
       <Status
         counts={statusCounts}
         selectedStatus={selectedStatus}
         onStatusChange={setSelectedStatus}
       />
 
-      <Grid
-        container
-        spacing={3}
+      {/* ===  BOX BỌC NGOÀI ĐỂ CĂN GIỮA CỤM GRID === */}
+      <Box
         sx={{
           width: "100%",
-          m: 0,
+          display: "flex",
+          justifyContent: "center",
+          mt: 3,
         }}
       >
-        {filteredProjects.map((project) => (
-          <Grid item key={project.id} xs={12} sm={6} md={4}>
-            <ProjectCard {...project} />
-          </Grid>
-        ))}
-      </Grid>
+        {/* === DANH SÁCH DỰ ÁN === */}
+        <Grid
+          container
+          spacing={3}
+          sx={{
+            width: "100%",
+            maxWidth: 1300,
+            justifyContent: "flex-start",
+          }}
+        >
+          {filteredProjects.map((project) => (
+            <Grid item key={project.id} xs={12} sm={6} md={4}>
+              <ProjectCard {...project} />
+            </Grid>
+          ))}
+        </Grid>
+      </Box>
     </Box>
   );
 }

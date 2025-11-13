@@ -12,418 +12,384 @@ import {
   TableHead,
   TableRow,
   TextField,
-  Divider,
   Grid,
-  Dialog,
-  DialogActions,
-  DialogContent,
   FormControl,
-  InputLabel,
   Select,
   MenuItem,
+  Divider,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import AttachFileIcon from "@mui/icons-material/AttachFile";
 import SaveIcon from "@mui/icons-material/Save";
-import { useNavigate, Outlet } from "react-router-dom";
-import { numberToVietnameseWords } from "../changeNum2Word/num2wod.jsx";
+import { numberToVietnameseWords } from "../changeNum2Word/num2wod.jsx"; // Đảm bảo đường dẫn này đúng
 
+// === Helper ===
 const formatCurrency = (v) =>
   new Intl.NumberFormat("vi-VN").format(Number(v) || 0) + " đ";
 
-function ApprovalSelect({ label, value, onChange }) {
-  const approverList = [
-    { id: 1, name: "Nguyễn Văn A" },
-    { id: 2, name: "Trần Thị B" },
-    { id: 3, name: "Lê Văn C" },
-  ];
+const createEmptyRow = () => ({
+  id: crypto.randomUUID(),
+  name: "",
+  unit: "",
+  quantity: 1,
+  materialPrice: 0,
+  laborPrice: 0,
+  note: "",
+});
 
-  return (
-    <Grid item xs={12} sm={6} md={3}>
-      <Typography fontWeight="bold" variant="body2" gutterBottom>
-        {label}
-      </Typography>
-      <FormControl variant="standard" fullWidth size="small">
-        <InputLabel id={`${label}-select-label`}>Chọn</InputLabel>
-        <Select
-          labelId={`${label}-select-label`}
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          label="Chọn người duyệt"
-        >
-          <MenuItem value="">
-            <em>Chưa chọn</em>
-          </MenuItem>
-          {approverList.map((approver) => (
-            <MenuItem key={approver.id} value={approver.name}>
-              {approver.name}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
-    </Grid>
-  );
-}
+export default function CreatePage() {
+  const [project, setProject] = useState("");
+  const [category, setCategory] = useState("");
+  const [workItems, setWorkItems] = useState([createEmptyRow()]);
 
-export default function CreateCard() {
-  const navigate = useNavigate();
-
-  const [formData, setFormData] = useState({
-    project: "",
-    address: "",
-    dateFrom: "",
-    dateTo: "",
-    batch: "",
-    creator: "Lê Văn Bằng",
-  });
-
-  const [workItems, setWorkItems] = useState(
-    Array(5)
-      .fill()
-      .map(() => ({
-        id: crypto.randomUUID(),
-        name: "",
-        cost: 0,
-        note: "",
-      }))
-  );
-
-  // Hàm này đã đúng (nhận id)
-  const handleChange = (name, value, id = null) => {
-    if (id === null) {
-      setFormData((p) => ({ ...p, [name]: value }));
-    } else {
-      setWorkItems((prev) =>
-        prev.map((item) => (item.id === id ? { ...item, [name]: value } : item))
-      );
-    }
+  const handleChange = (name, value, id) => {
+    setWorkItems((prev) =>
+      prev.map((item) => (item.id === id ? { ...item, [name]: value } : item))
+    );
   };
 
-  const totalCost = workItems.reduce((sum, i) => sum + Number(i.cost), 0);
-
-  const addRow = () =>
-    setWorkItems((p) => [
-      ...p,
-      {
-        id: crypto.randomUUID(),
-        name: "",
-        cost: 0,
-        note: "",
-      },
-    ]);
-
+  const addRow = () => setWorkItems((p) => [...p, createEmptyRow()]);
   const removeRow = (id) =>
     setWorkItems((p) => p.filter((item) => item.id !== id));
 
-  const handleContinue = () => {
-    navigate("approval", {
-      state: { formData, workItems, totalCost, approvalState },
-    });
+  const totalCost = workItems.reduce((sum, item) => {
+    const materialTotal = Number(item.quantity) * Number(item.materialPrice);
+    const laborTotal = Number(item.quantity) * Number(item.laborPrice);
+    return sum + materialTotal + laborTotal;
+  }, 0);
+
+  const tableInputSx = {
+    "& .MuiInputBase-root:before": { borderBottom: "1px solid #E5E7EB" },
+    "& .MuiInputBase-root:hover:not(.Mui-disabled):before": {
+      borderBottom: "1px solid #000000",
+    },
+    "& .MuiInputBase-root:after": { borderBottom: "1px solid #E5E7EB" },
+    "& input": { fontSize: "0.875rem", padding: "6px 8px" },
   };
 
-  // --- Khu vực ký duyệt ---
-  const approvals = [
-    { label: "CHỈ HUY TRƯỞNG", field: "chief" },
-    { label: "KẾ TOÁN", field: "accountant" },
-    { label: "GIÁM ĐỐC", field: "director" },
-  ];
-
-  const [approvalState, setApprovalState] = useState({
-    chief: "",
-    accountant: "",
-    director: "",
-  });
-
-  const handleApprovalChange = (field) => (value) =>
-    setApprovalState((prev) => ({ ...prev, [field]: value }));
-
-  const getApprovalDate = () => {
-    const d = new Date();
-    return `Ngày ${d.getDate()} tháng ${
-      d.getMonth() + 1
-    } năm ${d.getFullYear()}`;
+  const tableHeaderSx = {
+    backgroundColor: "#1C5B41",
+    color: "white",
+    fontWeight: "bold",
+    borderBottom: "1px solid #E5E7EB",
+    padding: "10px 8px",
+    textAlign: "center",
+    fontSize: "0.8rem",
   };
-
-  const renderField = (label, name, placeholder, fullWidth = true) => (
-    <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
-      <Typography sx={{ minWidth: 120, fontWeight: 600 }}>{label}:</Typography>
-      <TextField
-        variant="standard"
-        name={name}
-        value={formData[name]}
-        onChange={(e) => handleChange(name, e.target.value)}
-        placeholder={placeholder}
-        fullWidth={fullWidth}
-        sx={{
-          ml: 2,
-          "& .MuiInputBase-root:before": { borderBottom: "1px solid #E5E7EB" },
-          "& .MuiInputBase-root:hover:not(.Mui-disabled):before": {
-            borderBottom: "1px solid #000000ff",
-          },
-          "& .MuiInputBase-root:after": { borderBottom: "1px solid #E5E7EB" },
-        }}
-      />
-    </Box>
-  );
 
   return (
-    <Box sx={{ backgroundColor: "#ffffffff", minHeight: "100vh" }}>
-      <Container maxWidth="lg" sx={{ py: 4 }}>
+    <Box sx={{ backgroundColor: "#F4F7FE", minHeight: "100vh", py: 3 }}>
+      <Container maxWidth="xl">
         <Paper
-          elevation={3}
           sx={{
-            p: 4,
-            borderRadius: 4,
-            borderBottom: "4px solid rgba(17, 106, 1, 1)",
+            p: { xs: 2, md: 4 },
+            borderRadius: "12px",
+            borderTop: "4px solid #1C5B41",
+            backgroundColor: "#FFF",
+            boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
           }}
         >
           <Typography
             variant="h5"
             fontWeight="bold"
-            color="#2D5F3F"
+            color="#333"
             textAlign="center"
-            mb={2}
+            mb={4}
           >
-            BẢNG TỔNG HỢP CHI PHÍ THI CÔNG
+            TẠO CÔNG VIỆC MỚI
           </Typography>
 
-          <Divider
-            sx={{
-              backgroundColor: "#2D5F3F",
-              height: "2px",
-              borderRadius: "1px",
-              mb: 4,
-            }}
-          />
-
-          {/* === Form thông tin dự án === */}
+          {/* --- Chọn dự án & hạng mục --- */}
           <Box
             sx={{
               p: 3,
               borderRadius: 2,
               backgroundColor: "#F7FAFC",
               mb: 4,
-              textAlign: "left",
             }}
           >
-            {renderField("Dự án", "project", "Nhập tên dự án")}
-            {renderField("Địa điểm", "address", "Nhập địa điểm")}
-
-            <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
-              <Typography sx={{ minWidth: 120, fontWeight: 600 }}>
-                Thời gian:
-              </Typography>
-              <Box
+            {/* === ITEM 1 - Chọn Dự án === */}
+            <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 3 }}>
+              <Typography
                 sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 2,
-                  flex: 1,
-                  ml: 2,
+                  minWidth: "150px",
+                  fontWeight: 500,
+                  color: "#333",
+                  whiteSpace: "nowrap",
                 }}
               >
-                <TextField
-                  type="date"
-                  variant="standard"
-                  value={formData.dateFrom}
-                  onChange={(e) => handleChange("dateFrom", e.target.value)}
+                Chọn Dự án <span style={{ color: "#E53E3E" }}>*</span>:
+              </Typography>
+              <FormControl fullWidth variant="outlined">
+                <Select
+                  value={project}
+                  onChange={(e) => setProject(e.target.value)}
+                  displayEmpty
                   sx={{
-                    width: 140,
-                    "& .MuiInputBase-root:before": {
-                      borderBottom: "1px solid #E5E7EB", // ✅ mờ như phần trên
-                    },
-                    "& .MuiInputBase-root:hover:not(.Mui-disabled):before": {
-                      borderBottom: "1px solid #000000", // đậm khi hover
-                    },
-                    "& .MuiInputBase-root:after": {
-                      borderBottom: "1px solid #E5E7EB",
+                    backgroundColor: "white",
+                    "& .MuiSelect-select": {
+                      color: project ? "#333" : "#A0AEC0",
                     },
                   }}
-                />
-                <TextField
-                  type="date"
-                  variant="standard"
-                  value={formData.dateTo}
-                  onChange={(e) => handleChange("dateTo", e.target.value)}
-                  sx={{
-                    width: 140,
-                    "& .MuiInputBase-root:before": {
-                      borderBottom: "1px solid #E5E7EB",
-                    },
-                    "& .MuiInputBase-root:hover:not(.Mui-disabled):before": {
-                      borderBottom: "1px solid #000000",
-                    },
-                    "& .MuiInputBase-root:after": {
-                      borderBottom: "1px solid #E5E7EB",
-                    },
-                  }}
-                />
-              </Box>
+                >
+                  <MenuItem value="" disabled>
+                    -- Chọn dự án --
+                  </MenuItem>
+                  <MenuItem value={10}>Dự án A (The Aqua)</MenuItem>
+                  <MenuItem value={20}>Dự án B (Vinhomes)</MenuItem>
+                </Select>
+              </FormControl>
             </Box>
 
-            {renderField("Đợt", "batch", "Nhập thông tin")}
+            {/* === ITEM 2 - Chọn Hạng mục === */}
+            <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+              <Typography
+                sx={{
+                  minWidth: "150px",
+                  fontWeight: 500,
+                  color: "#333",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                Chọn Hạng mục <span style={{ color: "#E53E3E" }}>*</span>:
+              </Typography>
+              <FormControl fullWidth variant="outlined">
+                <Select
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value)}
+                  displayEmpty
+                  sx={{
+                    backgroundColor: "white",
+                    "& .MuiSelect-select": {
+                      color: category ? "#333" : "#A0AEC0",
+                    },
+                  }}
+                >
+                  <MenuItem value="" disabled>
+                    -- Chọn hạng mục --
+                  </MenuItem>
+                  <MenuItem value={10}>Hạng mục 1 (Xây thô)</MenuItem>
+                  <MenuItem value={20}>Hạng mục 2 (Hoàn thiện)</MenuItem>
+                </Select>
+              </FormControl>
+            </Box>
           </Box>
 
-          {/* === Bảng công việc === */}
+          {/* --- Bảng công việc --- */}
           <TableContainer component={Paper} variant="outlined" sx={{ mb: 0 }}>
             <Table size="small">
               <TableHead>
                 <TableRow>
-                  {["STT", "CÔNG VIỆC", "SỐ TIỀN", "GHI CHÚ", "THAO TÁC"].map(
-                    (h) => (
-                      <TableCell
-                        key={h}
-                        sx={{
-                          borderBottom: "1px solid #E5E7EB",
-                          backgroundColor: "#2D5F3F",
-                          fontWeight: 600,
-                          color: "white",
-                        }}
-                      >
-                        {h}
-                      </TableCell>
-                    )
-                  )}
+                  <TableCell
+                    rowSpan={2}
+                    sx={{ ...tableHeaderSx, width: "40px" }}
+                  >
+                    STT
+                  </TableCell>
+                  <TableCell
+                    rowSpan={2}
+                    sx={{ ...tableHeaderSx, minWidth: 200 }}
+                  >
+                    TÊN CÔNG VIỆC
+                  </TableCell>
+                  <TableCell
+                    rowSpan={2}
+                    sx={{ ...tableHeaderSx, width: "80px" }}
+                  >
+                    ĐƠN VỊ
+                  </TableCell>
+                  <TableCell
+                    rowSpan={2}
+                    sx={{ ...tableHeaderSx, width: "100px" }}
+                  >
+                    KHỐI LƯỢNG
+                  </TableCell>
+                  <TableCell colSpan={2} sx={{ ...tableHeaderSx }}>
+                    ĐƠN GIÁ
+                  </TableCell>
+                  <TableCell colSpan={2} sx={{ ...tableHeaderSx }}>
+                    THÀNH TIỀN
+                  </TableCell>
+                  <TableCell
+                    rowSpan={2}
+                    sx={{ ...tableHeaderSx, minWidth: 150 }}
+                  >
+                    GHI CHÚ
+                  </TableCell>
+                  <TableCell
+                    rowSpan={2}
+                    sx={{ ...tableHeaderSx, width: "100px" }}
+                  >
+                    THAO TÁC
+                  </TableCell>
+                </TableRow>
+
+                <TableRow>
+                  <TableCell sx={{ ...tableHeaderSx }}>VẬT LIỆU</TableCell>
+                  <TableCell sx={{ ...tableHeaderSx }}>NHÂN CÔNG</TableCell>
+                  <TableCell sx={{ ...tableHeaderSx }}>VẬT LIỆU</TableCell>
+                  <TableCell sx={{ ...tableHeaderSx }}>NHÂN CÔNG</TableCell>
                 </TableRow>
               </TableHead>
 
               <TableBody>
-                {workItems.map((row, i) => (
-                  <TableRow
-                    key={row.id}
-                    sx={{
-                      backgroundColor: i % 2 === 0 ? "#FFFFFF" : "#F7FAFC",
-                      "&:hover": { backgroundColor: "#E8F5E9" },
-                    }}
-                  >
-                    {/* STT */}
-                    <TableCell sx={{ borderBottom: "1px solid #E5E7EB" }}>
-                      {i + 1}
-                    </TableCell>
+                {workItems.map((row, i) => {
+                  const materialTotal =
+                    Number(row.quantity) * Number(row.materialPrice);
+                  const laborTotal =
+                    Number(row.quantity) * Number(row.laborPrice);
 
-                    {/* CÔNG VIỆC */}
-                    <TableCell sx={{ borderBottom: "1px solid #E5E7EB" }}>
-                      <TextField
-                        variant="standard"
-                        fullWidth
-                        name="name"
-                        value={row.name}
-                        // === SỬA 1: Dùng row.id thay vì i ===
-                        onChange={(e) =>
-                          handleChange("name", e.target.value, row.id)
-                        }
-                        placeholder="Nhập công việc"
-                        sx={{
-                          "& .MuiInputBase-root:before": {
-                            borderBottom: "1px solid #E5E7EB",
-                          },
-                          "& .MuiInputBase-root:hover:not(.Mui-disabled):before":
-                            {
-                              borderBottom: "1px solid #000000",
-                            },
-                          "& .MuiInputBase-root:after": {
-                            borderBottom: "1px solid #E5E7EB",
-                          },
-                        }}
-                      />
-                    </TableCell>
-
-                    {/* SỐ TIỀN */}
-                    <TableCell
-                      align="right"
-                      sx={{ borderBottom: "1px solid #E5E7EB" }}
+                  return (
+                    <TableRow
+                      key={row.id}
+                      sx={{
+                        backgroundColor: i % 2 === 0 ? "#FFFFFF" : "#F9FAFB",
+                        "&:hover": { backgroundColor: "#E8F5E9" },
+                        "& .MuiTableCell-root": {
+                          borderBottom: "1px solid #E5E7EB",
+                          padding: "4px 8px",
+                        },
+                      }}
                     >
-                      <TextField
-                        variant="standard"
-                        fullWidth
-                        type="number"
-                        name="cost"
-                        value={row.cost}
-                        // === SỬA 2: Dùng row.id thay vì i ===
-                        onChange={(e) =>
-                          handleChange("cost", e.target.value, row.id)
-                        }
-                        sx={{
-                          "& input": { textAlign: "right" },
-                          "& .MuiInputBase-root:before": {
-                            borderBottom: "1px solid #E5E7EB",
-                          },
-                          "& .MuiInputBase-root:hover:not(.Mui-disabled):before":
-                            {
-                              borderBottom: "1px solid #000000",
-                            },
-                          "& .MuiInputBase-root:after": {
-                            borderBottom: "1px solid #E5E7EB",
-                          },
-                        }}
-                      />
-                    </TableCell>
+                      <TableCell align="center">{i + 1}</TableCell>
 
-                    {/* GHI CHÚ */}
-                    <TableCell sx={{ borderBottom: "1px solid #E5E7EB" }}>
-                      <TextField
-                        variant="standard"
-                        fullWidth
-                        name="note"
-                        value={row.note}
-                        // === SỬA 3: Dùng row.id thay vì i ===
-                        onChange={(e) =>
-                          handleChange("note", e.target.value, row.id)
-                        }
-                        placeholder="Ghi chú"
-                        sx={{
-                          "& .MuiInputBase-root:before": {
-                            borderBottom: "1px solid #E5E7EB",
-                          },
-                          "& .MuiInputBase-root:hover:not(.Mui-disabled):before":
-                            {
-                              borderBottom: "1px solid #000000",
-                            },
-                          "& .MuiInputBase-root:after": {
-                            borderBottom: "1px solid #E5E7EB",
-                          },
-                        }}
-                      />
-                    </TableCell>
+                      <TableCell>
+                        <TextField
+                          variant="standard"
+                          fullWidth
+                          value={row.name}
+                          onChange={(e) =>
+                            handleChange("name", e.target.value, row.id)
+                          }
+                          placeholder="Nhập tên công việc"
+                          sx={tableInputSx}
+                        />
+                      </TableCell>
 
-                    {/* THAO TÁC */}
-                    <TableCell
-                      align="center"
-                      sx={{ borderBottom: "1px solid #E5E7EB" }}
-                    >
-                      <Button
-                        variant="outlined"
-                        startIcon={<DeleteOutlineIcon />}
-                        onClick={() => removeRow(row.id)} // (Phần này đã đúng)
-                        sx={{
-                          borderColor: "#CBD5E1",
-                          color: "#475569",
-                          textTransform: "none",
-                          borderRadius: "10px",
-                          px: 1.5,
-                          py: 0.5,
-                        }}
-                      >
-                        Xóa
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                      <TableCell>
+                        <TextField
+                          variant="standard"
+                          fullWidth
+                          value={row.unit}
+                          onChange={(e) =>
+                            handleChange("unit", e.target.value, row.id)
+                          }
+                          placeholder="Công"
+                          sx={tableInputSx}
+                        />
+                      </TableCell>
+
+                      <TableCell>
+                        <TextField
+                          variant="standard"
+                          fullWidth
+                          type="number"
+                          value={row.quantity}
+                          onChange={(e) =>
+                            handleChange("quantity", e.target.value, row.id)
+                          }
+                          sx={{
+                            ...tableInputSx,
+                            "& input": { textAlign: "right" },
+                          }}
+                        />
+                      </TableCell>
+
+                      <TableCell>
+                        <TextField
+                          variant="standard"
+                          fullWidth
+                          type="number"
+                          value={row.materialPrice}
+                          onChange={(e) =>
+                            handleChange(
+                              "materialPrice",
+                              e.target.value,
+                              row.id
+                            )
+                          }
+                          sx={{
+                            ...tableInputSx,
+                            "& input": { textAlign: "right" },
+                          }}
+                        />
+                      </TableCell>
+
+                      <TableCell>
+                        <TextField
+                          variant="standard"
+                          fullWidth
+                          type="number"
+                          value={row.laborPrice}
+                          onChange={(e) =>
+                            handleChange("laborPrice", e.target.value, row.id)
+                          }
+                          sx={{
+                            ...tableInputSx,
+                            "& input": { textAlign: "right" },
+                          }}
+                        />
+                      </TableCell>
+
+                      <TableCell align="right" sx={{ fontSize: "0.875rem" }}>
+                        {new Intl.NumberFormat("vi-VN").format(materialTotal)}
+                      </TableCell>
+
+                      <TableCell align="right" sx={{ fontSize: "0.875rem" }}>
+                        {new Intl.NumberFormat("vi-VN").format(laborTotal)}
+                      </TableCell>
+
+                      <TableCell>
+                        <TextField
+                          variant="standard"
+                          fullWidth
+                          value={row.note}
+                          onChange={(e) =>
+                            handleChange("note", e.target.value, row.id)
+                          }
+                          placeholder="Nhập ghi chú"
+                          sx={tableInputSx}
+                        />
+                      </TableCell>
+
+                      <TableCell align="center">
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          startIcon={<DeleteOutlineIcon fontSize="small" />}
+                          onClick={() => removeRow(row.id)}
+                          sx={{
+                            borderColor: "#CBD5E1",
+                            color: "#475569",
+                            textTransform: "none",
+                            borderRadius: "6px",
+                            padding: "2px 8px",
+                            fontSize: "0.75rem",
+                          }}
+                        >
+                          Xóa
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             </Table>
           </TableContainer>
 
-          {/* === Nút thêm dòng === */}
+          {/* --- Nút thêm dòng --- */}
           <Box sx={{ display: "flex", justifyContent: "center", py: 2 }}>
             <Button
               variant="outlined"
               startIcon={<AddIcon />}
               onClick={addRow}
               sx={{
-                border: "1px dashed #2D5F3F",
-                color: "#2D5F3F",
+                border: "2px dashed #1C5B41",
+                color: "#1C5B41",
                 fontWeight: 600,
+                textTransform: "none",
+                borderRadius: "10px",
               }}
             >
               Thêm dòng mới
@@ -433,24 +399,21 @@ export default function CreateCard() {
           {/* --- Tổng cộng --- */}
           <Box
             sx={{
-              mt: 3,
-              borderRadius: "20px",
-              overflow: "hidden",
-              boxShadow: "0 2px 6px rgba(0,0,0,0.08)",
+              mt: 2,
+              borderRadius: "12px",
+              backgroundColor: "#e3fae7ff",
             }}
           >
             <Box
               sx={{
-                borderTop: "4px solid #2D5F3F",
-                backgroundColor: "#F8FAFC",
-                p: 3,
-                borderBottom: "1px solid #E2E8F0",
+                p: 2.5,
                 display: "flex",
-                flexDirection: "row",
                 justifyContent: "center",
                 alignItems: "center",
-                flexWrap: "wrap",
                 gap: 2,
+                flexWrap: "wrap",
+                borderBottom: "2px solid #2D5F3F",
+                borderTop: "2px solid #2D5F3F",
               }}
             >
               <Typography variant="h6" sx={{ fontWeight: "bold" }}>
@@ -459,7 +422,7 @@ export default function CreateCard() {
               <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                 <Typography
                   variant="h6"
-                  sx={{ fontWeight: "bold", color: "#2D5F3F" }}
+                  sx={{ fontWeight: "bold", color: "#1C5B41" }}
                 >
                   {formatCurrency(totalCost)}
                 </Typography>
@@ -486,29 +449,23 @@ export default function CreateCard() {
             </Box>
 
             {/* --- Đính kèm tệp --- */}
-            <Box
+          </Box>
+          <Box sx={{ p: 2.5 }}>
+            <Button
+              variant="outlined"
+              startIcon={<AttachFileIcon />}
+              component="label"
               sx={{
-                backgroundColor: "#FFFFFF",
-                p: 2.5,
-                display: "flex",
-                justifyContent: "flex-start",
+                textTransform: "none",
+                color: "#1C5B41",
+                fontWeight: 600,
+                border: "2px dashed #1C5B41",
+                borderRadius: "10px",
               }}
             >
-              <Button
-                variant="outlined"
-                startIcon={<AttachFileIcon />}
-                component="label"
-                sx={{
-                  borderStyle: "dashed",
-                  textTransform: "none",
-                  borderColor: "#2D5F3F",
-                  color: "#2D5F3F",
-                }}
-              >
-                Đính kèm tệp
-                <input type="file" hidden multiple />
-              </Button>
-            </Box>
+              Đính kèm tệp
+              <input type="file" hidden multiple />
+            </Button>
           </Box>
 
           {/* --- Nút hành động --- */}
@@ -518,55 +475,41 @@ export default function CreateCard() {
               justifyContent: "center",
               alignItems: "center",
               gap: 2,
-              mt: 3,
+              mt: 4,
             }}
           >
-            <Button variant="contained" sx={{ backgroundColor: "#b0bec5" }}>
-              Lưu nháp
-            </Button>
             <Button
               variant="contained"
-              sx={{ backgroundColor: "#1C5B41" }}
-              onClick={handleContinue}
+              sx={{
+                backgroundColor: "#475569",
+                color: "white",
+                textTransform: "none",
+                fontWeight: 600,
+                padding: "8px 20px",
+                borderRadius: "8px",
+                "&:hover": { backgroundColor: "#334155" },
+              }}
+            >
+              Lưu nháp
+            </Button>
+
+            <Button
+              variant="contained"
+              startIcon={<SaveIcon />}
+              sx={{
+                backgroundColor: "#1C5B41",
+                textTransform: "none",
+                fontWeight: 600,
+                padding: "8px 20px",
+                borderRadius: "8px",
+                "&:hover": { backgroundColor: "#154A32" },
+              }}
             >
               Lưu & Tiếp tục
             </Button>
           </Box>
-
-          {/* --- Khu vực ký duyệt --- */}
-          <Box
-            sx={{ p: 3, borderRadius: 2, backgroundColor: "#f9fafb", mt: 4 }}
-          >
-            <Typography textAlign="center" mb={3} fontStyle="italic">
-              {getApprovalDate()}
-            </Typography>
-            <Grid
-              container
-              spacing={2}
-              textAlign="center"
-              justifyContent="space-evenly" // ✅ giãn đều các cột
-              alignItems="center" // ✅ căn giữa dọc
-            >
-              <Grid item xs={12} sm={6} md={3}>
-                <Typography fontWeight="bold" variant="body2" gutterBottom>
-                  NGƯỜI LẬP
-                </Typography>
-                <Typography>{formData.creator}</Typography>
-              </Grid>
-
-              {approvals.map(({ label, field }) => (
-                <ApprovalSelect
-                  key={field}
-                  label={label}
-                  value={approvalState[field]}
-                  onChange={handleApprovalChange(field)}
-                />
-              ))}
-            </Grid>
-          </Box>
         </Paper>
       </Container>
-      <Outlet />
     </Box>
   );
 }

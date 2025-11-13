@@ -5,6 +5,7 @@ import ReactDOM from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { CssBaseline } from "@mui/material";
 
+import CreatePage from "./pages/CreatePage.jsx";
 import DashboardPage from "./pages/DashboardPage";
 import LoginPage from "./pages/LoginPage.jsx";
 import RegisterPage from "./pages/RegisterPage.jsx";
@@ -42,7 +43,7 @@ const router = createBrowserRouter([
       },
 
       { path: "project/:projectId", element: <CardDetail /> },
-      // { path: "createPage", element: <CreateProjectPage /> },
+      { path: "createPage", element: <CreatePage /> },
     ],
   },
 ]);

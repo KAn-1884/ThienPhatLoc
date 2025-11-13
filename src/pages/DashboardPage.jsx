@@ -1,5 +1,4 @@
-// File: src/pages/DashboardPage.jsx
-
+import React, { useEffect, useState } from "react";
 import { useNavigate, Outlet, useLocation } from "react-router-dom";
 import {
   AppBar,
@@ -19,11 +18,10 @@ import {
 import AddIcon from "@mui/icons-material/Add";
 import FactCheckOutlinedIcon from "@mui/icons-material/FactCheckOutlined";
 import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
-import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown"; // <-- IMPORT MỚI
-import Logo from "../assets/img/logo_TPL.jpeg"; // Giả định path này đúng
-import React, { useEffect, useState } from "react";
+import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import { useMsal, useIsAuthenticated } from "@azure/msal-react";
 
+import Logo from "../assets/img/logo_TPL.jpeg";
 import { projectData } from "../data/projectData";
 
 function DashboardPage() {
@@ -33,13 +31,11 @@ function DashboardPage() {
   const isAuthenticated = useIsAuthenticated();
   const isMobile = useMediaQuery("(max-width:900px)");
 
-  // --- State cho Mobile Nav Menu ---
   const [mobileNavAnchorEl, setMobileNavAnchorEl] = useState(null);
+  const [userMenuAnchorEl, setUserMenuAnchorEl] = useState(null);
+
   const handleMobileNavOpen = (e) => setMobileNavAnchorEl(e.currentTarget);
   const handleMobileNavClose = () => setMobileNavAnchorEl(null);
-
-  // --- State cho User Profile Menu (Desktop) ---
-  const [userMenuAnchorEl, setUserMenuAnchorEl] = useState(null);
   const handleUserMenuOpen = (e) => setUserMenuAnchorEl(e.currentTarget);
   const handleUserMenuClose = () => setUserMenuAnchorEl(null);
 
@@ -115,7 +111,6 @@ function DashboardPage() {
       sx={{
         display: "flex",
         flexDirection: "column",
-        minWidth: "375px",
         minHeight: "100vh",
         backgroundColor: "#F7FAFC",
       }}
@@ -137,6 +132,7 @@ function DashboardPage() {
             sx={{ width: 40, height: 40, mr: 1.5, cursor: "pointer" }}
             onClick={() => navigate("/")}
           />
+
           <Typography
             variant="h6"
             sx={{ fontWeight: "bold", flexGrow: { xs: 1, md: 0 } }}
@@ -155,7 +151,7 @@ function DashboardPage() {
             </IconButton>
           )}
 
-          {/* === CÁC NÚT ĐIỀU HƯỚNG TRÊN DESKTOP === */}
+          {/* === NÚT ĐIỀU HƯỚNG TRÊN DESKTOP === */}
           {!isMobile && (
             <>
               {navItems.map(({ label, to, icon, badgeContent }) => {
@@ -198,14 +194,14 @@ function DashboardPage() {
                 );
               })}
 
-              {/* === NÚT AVATAR TRÊN DESKTOP (CÓ DROPDOWN) === */}
+              {/* === NÚT AVATAR TRÊN DESKTOP === */}
               <Button
                 onClick={handleUserMenuOpen}
                 sx={{
                   textTransform: "none",
                   color: "#333",
                   borderRadius: "8px",
-                  p: "4px 8px", // Thêm padding
+                  p: "4px 8px",
                   "&:hover": {
                     bgcolor: "#f0f0f0",
                   },
@@ -227,7 +223,9 @@ function DashboardPage() {
                     fontWeight: 600,
                     mr: 0.5,
                   }}
-                ></Typography>
+                >
+                  {userName}
+                </Typography>
                 <ArrowDropDownIcon />
               </Button>
             </>
@@ -239,14 +237,8 @@ function DashboardPage() {
           anchorEl={userMenuAnchorEl}
           open={Boolean(userMenuAnchorEl)}
           onClose={handleUserMenuClose}
-          anchorOrigin={{
-            vertical: "bottom",
-            horizontal: "right",
-          }}
-          transformOrigin={{
-            vertical: "top",
-            horizontal: "right",
-          }}
+          anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+          transformOrigin={{ vertical: "top", horizontal: "right" }}
           sx={{ mt: 1 }}
         >
           <MenuItem disabled sx={{ opacity: "1 !important" }}>
@@ -255,22 +247,8 @@ function DashboardPage() {
             </Typography>
           </MenuItem>
           <Divider />
-          <MenuItem
-            onClick={() => {
-              handleUserMenuClose();
-              // navigate("/profile"); // Thêm hành động nếu muốn
-            }}
-          >
-            Hồ sơ của tôi
-          </MenuItem>
-          <MenuItem
-            onClick={() => {
-              handleUserMenuClose();
-              // navigate("/settings"); // Thêm hành động nếu muốn
-            }}
-          >
-            Cài đặt
-          </MenuItem>
+          <MenuItem onClick={handleUserMenuClose}>Hồ sơ của tôi</MenuItem>
+          <MenuItem onClick={handleUserMenuClose}>Cài đặt</MenuItem>
           <Divider />
           <MenuItem
             onClick={() => {
@@ -296,13 +274,11 @@ function DashboardPage() {
                 handleMobileNavClose();
               }}
             >
-              {item.icon && (
-                <Box sx={{ mr: 1.5, display: "flex" }}>
-                  <Badge badgeContent={item.badgeContent} color="error">
-                    {item.icon}
-                  </Badge>
-                </Box>
-              )}
+              <Box sx={{ mr: 1.5, display: "flex" }}>
+                <Badge badgeContent={item.badgeContent} color="error">
+                  {item.icon}
+                </Badge>
+              </Box>
               {item.label}
             </MenuItem>
           ))}
@@ -323,7 +299,7 @@ function DashboardPage() {
         sx={{
           flexGrow: 1,
           backgroundColor: "#f4f6f8",
-          padding: { xs: 1.5, md: 3 },
+          py: { xs: 0, md: 3 },
         }}
       >
         <Outlet />
