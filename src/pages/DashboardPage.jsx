@@ -6,7 +6,7 @@ import {
   Toolbar,
   Typography,
   Button,
-  Avatar,
+  Avatar, // Giữ lại vì Menu mobile vẫn có thể dùng
   IconButton,
   CircularProgress,
   Menu,
@@ -19,14 +19,14 @@ import AddIcon from "@mui/icons-material/Add";
 import FactCheckOutlinedIcon from "@mui/icons-material/FactCheckOutlined";
 import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
+import PersonIcon from "@mui/icons-material/Person";
+import MenuIcon from "@mui/icons-material/Menu"; // <<< 1. ICON 3 GẠCH TỪ MUI
 import { useMsal, useIsAuthenticated } from "@azure/msal-react";
 
 import Logo from "../assets/img/logo_TPL.jpeg";
 import { projectData } from "../data/projectData";
 
 function DashboardPage() {
-  // ... (Tất cả logic state và
-  //      function handlers của bạn giữ nguyên) ...
   const navigate = useNavigate();
   const location = useLocation();
   const { instance, accounts, inProgress } = useMsal();
@@ -39,26 +39,25 @@ function DashboardPage() {
   const handleUserMenuOpen = (e) => setUserMenuAnchorEl(e.currentTarget);
   const handleUserMenuClose = () => setUserMenuAnchorEl(null);
   const userName = accounts.length > 0 ? accounts[0].name : "User";
-  const userInitials =
-    userName
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase() || "U";
+
   useEffect(() => {
     if (!isAuthenticated && inProgress === "none") {
       navigate("/login");
     }
   }, [isAuthenticated, inProgress, navigate]);
+
   const handleLogout = () => {
     instance.logoutRedirect({
       postLogoutRedirectUri: "/login",
     });
   };
+
   const projectsToApproveCount = projectData.filter(
     (p) => p.status === "Chờ duyệt"
   ).length;
+
   if (inProgress !== "none") {
+    // ... (Giữ nguyên code loading) ...
     return (
       <Box
         sx={{
@@ -105,7 +104,7 @@ function DashboardPage() {
         display: "flex",
         flexDirection: "column",
         minHeight: "100vh",
-        backgroundColor: "#F7FAFC", // <-- Đây là màu xám mờ (gần trắng)
+        backgroundColor: "#F7FAFC",
       }}
     >
       <AppBar
@@ -117,31 +116,50 @@ function DashboardPage() {
           borderBottom: "1px solid #E0E0E0",
         }}
       >
-        {/* ... (Code Toolbar của bạn giữ nguyên) ... */}
         <Toolbar>
+          {isMobile && (
+            <>
+              <IconButton
+                color="inherit"
+                aria-label="open navigation menu"
+                edge="start"
+                onClick={handleMobileNavOpen}
+                sx={{ mr: 1, color: "#1C5B41" }}
+              >
+                <MenuIcon />
+              </IconButton>
+            </>
+          )}
+
           <Box
             component="img"
             src={Logo}
             alt="TPL Logo"
-            sx={{ width: 40, height: 40, mr: 1.5, cursor: "pointer" }}
+            sx={{
+              width: 40,
+              height: 40,
+              cursor: "pointer",
+              ml: { xs: 0, md: 1 },
+            }}
             onClick={() => navigate("/")}
           />
+
           <Typography
             variant="h6"
-            sx={{ fontWeight: "bold", flexGrow: { xs: 1, md: 0 } }}
+            sx={{
+              fontWeight: "bold",
+              ml: 1.5,
+              display: { xs: "none", md: "block" },
+            }}
           >
             Thiên Phát Lộc E&C
           </Typography>
-          {!isMobile && <Box sx={{ flexGrow: 1 }} />}
-          {isMobile && (
-            <IconButton onClick={handleMobileNavOpen} sx={{ ml: "auto" }}>
-              <Avatar sx={{ backgroundColor: "#1C5B41" }}>
-                {userInitials}
-              </Avatar>
-            </IconButton>
-          )}
+
+          <Box sx={{ flexGrow: 1 }} />
+
           {!isMobile && (
             <>
+              {/* Nav items */}
               {navItems.map(({ label, to, icon, badgeContent }) => {
                 let isActive = false;
                 if (to === "/") {
@@ -170,6 +188,7 @@ function DashboardPage() {
                       mr: 1.5,
                       textTransform: "none",
                       borderRadius: "8px",
+                      fontWeight: "bold",
                       bgcolor: isActive ? "#1C5B41" : "transparent",
                       color: isActive ? "#fff" : "#333",
                       "&:hover": {
@@ -181,43 +200,49 @@ function DashboardPage() {
                   </Button>
                 );
               })}
+
+              {/* User button (Desktop) */}
               <Button
                 onClick={handleUserMenuOpen}
                 sx={{
                   textTransform: "none",
                   color: "#333",
                   borderRadius: "8px",
+                  backgroundColor: "#f3f4f6ff",
                   p: "4px 8px",
                   "&:hover": {
-                    bgcolor: "#f0f0f0",
+                    bgcolor: "#F7FAFC",
                   },
                 }}
               >
-                <Avatar
-                  sx={{
-                    width: 32,
-                    height: 32,
-                    backgroundColor: "#1C5B41",
-                    mr: 1,
-                  }}
-                >
-                  {userInitials}
-                </Avatar>
-                <Typography
-                  sx={{
-                    display: { xs: "none", md: "block" },
-                    fontWeight: 600,
-                    mr: 0.5,
-                  }}
-                >
-                  {userName}
-                </Typography>
+                <PersonIcon sx={{ mr: 0.5, color: "#000000ff" }} />
                 <ArrowDropDownIcon />
               </Button>
             </>
           )}
+
+          {/* ⭐️⭐️⭐️ CODE USER ICON (MOBILE) ⭐️⭐️⭐️ */}
+          {isMobile && (
+            <IconButton
+              onClick={handleUserMenuOpen}
+              sx={{
+                p: "4px",
+                borderRadius: "8px",
+                backgroundColor: "#dce0e4ff",
+                color: "#000000ff",
+                "&:hover": {
+                  bgcolor: "#F7FAFC",
+                },
+              }}
+            >
+              <PersonIcon />
+            </IconButton>
+          )}
         </Toolbar>
-        {/* ... (Code Menus của bạn giữ nguyên) ... */}
+
+        {/* ⭐️⭐️⭐️ MENU ĐÃ TÁCH BIỆT ⭐️⭐️⭐️ */}
+
+        {/* Menu Người Dùng (User Menu) - Dùng cho cả Desktop và Mobile */}
         <Menu
           anchorEl={userMenuAnchorEl}
           open={Boolean(userMenuAnchorEl)}
@@ -244,6 +269,8 @@ function DashboardPage() {
             Đăng xuất
           </MenuItem>
         </Menu>
+
+        {/* Menu Điều Hướng (Nav Menu) - CHỈ DÙNG CHO MOBILE */}
         <Menu
           anchorEl={mobileNavAnchorEl}
           open={Boolean(mobileNavAnchorEl)}
@@ -265,15 +292,7 @@ function DashboardPage() {
               {item.label}
             </MenuItem>
           ))}
-          <Divider />
-          <MenuItem
-            onClick={() => {
-              handleLogout();
-              handleMobileNavClose();
-            }}
-          >
-            Đăng xuất
-          </MenuItem>
+          {/* <<< ĐÃ XÓA 'ĐĂNG XUẤT' KHỎI MENU NÀY */}
         </Menu>
       </AppBar>
 
@@ -282,16 +301,11 @@ function DashboardPage() {
         component="main"
         sx={{
           flexGrow: 1,
-          backgroundColor: "#f4f6f8", // <-- NỀN XÁM MỜ CỦA BẠN
-          py: { xs: 0, md: 3 }, // Padding trên/dưới
+          backgroundColor: "#f4f6f8",
+          py: { xs: 0, md: 3 },
         }}
       >
         <Outlet />
-        {/* Outlet sẽ render:
-            1. DashboardHome (trắng, 96%, căn giữa)
-            2. HOẶC CreatePage (trắng, 100%, sát lề)
-            ...tùy vào URL
-        */}
       </Box>
     </Box>
   );
