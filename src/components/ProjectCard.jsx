@@ -54,10 +54,10 @@ function ProjectCard({
     navigate(`/project/${id}`);
   };
 
+  // ĐÃ XÓA minWidth: "90px" -> Rất Tốt
   const labelStyles = {
     color: "#718096",
     flexShrink: 0,
-    minWidth: "90px",
     textAlign: "left",
     lineHeight: 1.5,
   };
@@ -76,9 +76,8 @@ function ProjectCard({
         borderRadius: "16px",
         borderColor: "rgba(45, 95, 63, 0.65)",
         borderWidth: "1.5px",
-        height: "100%",
-        width: { xs: "100%", sm: "360px", md: "426px" },
-        maxWidth: { xs: "410px" },
+        height: "100%", // Giúp card cao bằng nhau
+        width: "100%", // Lấp đầy cột 33%
         textAlign: "left",
         cursor: "pointer",
         display: "flex",
@@ -98,7 +97,7 @@ function ProjectCard({
           flexDirection: "column",
         }}
       >
-        {/* === CỤM 1: TIÊU ĐỀ === */}
+        {/* === CỤM 1: TIÊU ĐỀ (Đã sửa) === */}
         <Box sx={{ mb: 2 }}>
           <Box
             sx={{
@@ -109,18 +108,29 @@ function ProjectCard({
               mb: 1.5,
             }}
           >
-            <Box>
-              <Typography variant="h6" sx={{ fontWeight: "bold" }}>
+            {/* 1. Box bọc Tiêu đề phải có minWidth: 0 */}
+            <Box sx={{ minWidth: 0, mr: 1.5 }}>
+              <Typography
+                variant="h6"
+                sx={{
+                  fontWeight: "bold",
+                  // 2. Ép Tiêu đề xuống hàng
+                  wordBreak: "break-word",
+                  whiteSpace: "normal",
+                }}
+              >
                 {title}
               </Typography>
               <Typography
                 variant="body2"
                 color="text.secondary"
-                sx={{ wordBreak: "break-all" }}
+                sx={{ wordBreak: "break-all" }} // ID cũng phải xuống hàng
               >
                 {formId}
               </Typography>
             </Box>
+
+            {/* Chip (không đổi) */}
             <Chip
               label={status}
               size="small"
@@ -130,15 +140,16 @@ function ProjectCard({
                 fontWeight: "bold",
                 borderRadius: "6px",
                 padding: "0 2px",
+                flexShrink: 0, // Không cho chip co lại
                 ...getStatusStyles(status),
               }}
             />
           </Box>
         </Box>
 
-        {/* === CỤM 2: NỘI DUNG CHÍNH  === */}
+        {/* === CỤM 2: NỘI DUNG CHÍNH (Đã đúng) === */}
         <Box sx={{ flexGrow: 1 }}>
-          {/* Hàng Địa điểm */}
+          {/* Hàng Địa điểm (Đã đúng) */}
           <Box
             sx={{
               ...rowBoxStyles,
@@ -148,75 +159,80 @@ function ProjectCard({
             <Typography variant="body2" sx={labelStyles}>
               Địa điểm:
             </Typography>
-            <Typography
-              variant="body2"
-              sx={{
-                textAlign: "right",
-                color: "#2D3748",
-                fontWeight: "bold",
-                wordBreak: "break-word",
-                flex: 1,
-                lineHeight: 1.5,
-              }}
-            >
-              {address}
-            </Typography>
+            {/* Box này (flex: 1, minWidth: 0) sẽ co lại
+                và ép Typography bên trong xuống hàng */}
+            <Box sx={{ flex: 1, minWidth: 0, textAlign: "right" }}>
+              <Typography
+                variant="body2"
+                sx={{
+                  color: "#2D3748",
+                  fontWeight: "bold",
+                  lineHeight: 1.5,
+                  wordBreak: "break-all", // Ép địa chỉ xuống hàng
+                  whiteSpace: "normal",
+                }}
+              >
+                {address}
+              </Typography>
+            </Box>
           </Box>
 
           <Divider sx={{ my: 1, borderColor: "rgba(0,0,0,0.05)" }} />
 
-          {/* Hàng Số công việc */}
+          {/* Hàng Số công việc (Đã đúng) */}
           <Box
             sx={{
               ...rowBoxStyles,
-              alignItems: "center", // 'center' vì nội dung 1 dòng
+              alignItems: "center",
             }}
           >
             <Typography variant="body2" sx={labelStyles}>
               Số công việc:
             </Typography>
-            <Typography
-              variant="body2"
-              sx={{
-                color: "#2D3748",
-                flex: 1,
-                textAlign: "right",
-                lineHeight: 1.5,
-              }}
-            >
-              {jobCount}
-            </Typography>
+            <Box sx={{ flex: 1, minWidth: 0, textAlign: "right" }}>
+              <Typography
+                variant="body2"
+                sx={{
+                  color: "#2D3748",
+                  lineHeight: 1.5,
+                }}
+              >
+                {jobCount}
+              </Typography>
+            </Box>
           </Box>
 
           <Divider sx={{ my: 1, borderColor: "rgba(0,0,0,0.05)" }} />
 
-          {/* Hàng Tổng chi phí */}
+          {/* Hàng Tổng chi phí (Đã đúng) */}
           <Box
             sx={{
               ...rowBoxStyles,
-              alignItems: "center", // 'center' vì nội dung 1 dòng
+              alignItems: "center",
             }}
           >
             <Typography variant="body2" sx={labelStyles}>
               Tổng chi phí:
             </Typography>
-            <Typography
-              sx={{
-                fontWeight: "bold",
-                color: "#2D5F3F",
-                flex: 1,
-                textAlign: "right",
-                lineHeight: 1.5,
-              }}
-            >
-              {totalCost}
-            </Typography>
+            <Box sx={{ flex: 1, minWidth: 0, textAlign: "right" }}>
+              <Typography
+                sx={{
+                  fontWeight: "bold",
+                  color: "#2D5F3F",
+                  lineHeight: 1.5,
+                  wordBreak: "break-all", // Ép cả số tiền xuống hàng
+                  whiteSpace: "normal",
+                }}
+              >
+                {totalCost}
+              </Typography>
+            </Box>
           </Box>
         </Box>
 
         <Divider sx={{ my: 1, borderColor: "rgba(0,0,0,0.05)" }} />
 
-        {/* === CỤM 3: LÝ DO TỪ CHỐI === */}
+        {/* === CỤM 3: LÝ DO TỪ CHỐI (Giữ nguyên) === */}
         {status === "Từ chối" && rejectionReason && (
           <>
             <Box
@@ -234,12 +250,11 @@ function ProjectCard({
                 {rejectionReason}
               </Typography>
             </Box>
-
             <Divider sx={{ my: 1.5, borderColor: "rgba(0,0,0,0.05)" }} />
           </>
         )}
 
-        {/* === CỤM 4: FOOTER === */}
+        {/* === CỤM 4: FOOTER (Giữ nguyên) === */}
         <Box>
           <Stack
             direction="row"

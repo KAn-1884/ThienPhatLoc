@@ -2,23 +2,30 @@ import React, { useState, useMemo } from "react";
 import {
   Box,
   Typography,
-  Grid,
+  // Grid, // <-- BỎ Grid
   Button,
   TextField,
   InputAdornment,
-  // useMediaQuery, // <-- KHÔNG CẦN DÙNG NỮA
 } from "@mui/material";
 import { Search as SearchIcon, Add as AddIcon } from "@mui/icons-material";
 
-import ProjectCard from "./ProjectCard.jsx";
-import Status from "./Status.jsx";
+// Đảm bảo đường dẫn import của bạn là đúng
+import ProjectCard from "../components/ProjectCard.jsx";
+import Status from "../components/Status.jsx";
 import { projectData } from "../data/projectData.js";
+
+// === LOGIC 33% + 1% GAP CỦA BẠN ===
+// Chúng ta sẽ dùng spacing={3} của MUI, tương đương 24px
+// Box cha sẽ có margin âm 12px (nửa gap)
+// Box con sẽ có padding 12px (nửa gap)
+// 12px + 12px = 24px (đây là "1% gap" của bạn)
+const gap = 3; // Tương đương 24px
 
 export default function DashboardHome() {
   const [selectedStatus, setSelectedStatus] = useState("Tất cả");
 
+  // Giữ nguyên 2 khối useMemo
   const statusCounts = useMemo(() => {
-    // ... (Giữ nguyên)
     const counts = {
       "Tất cả": projectData.length,
       Nháp: 0,
@@ -35,23 +42,22 @@ export default function DashboardHome() {
   }, []);
 
   const filteredProjects = useMemo(() => {
-    // ... (Giữ nguyên)
     if (selectedStatus === "Tất cả") return projectData;
     return projectData.filter((project) => project.status === selectedStatus);
   }, [selectedStatus]);
 
   return (
+    // === BOX 96% CỦA BẠN ===
     <Box
       sx={{
-        // ... (Box cha giữ nguyên)
         display: "flex",
         flexDirection: "column",
         alignItems: "stretch",
         backgroundColor: "#FFF",
         padding: { xs: 1.5, md: 3 },
-        borderRadius: { xs: 0, md: "12px" },
-        width: "100%",
-        maxWidth: "100%",
+        borderRadius: "12px",
+        width: { xs: "100%", md: "96%" },
+        margin: "0 auto",
         overflowX: "hidden",
         boxSizing: "border-box",
         minHeight: "100%",
@@ -71,7 +77,6 @@ export default function DashboardHome() {
         <Typography variant="h5" sx={{ fontWeight: "bold", color: "#2D3748" }}>
           Danh sách dự án
         </Typography>
-        {/* ... Button (Giữ nguyên) ... */}
         <Button
           variant="contained"
           startIcon={
@@ -100,14 +105,13 @@ export default function DashboardHome() {
 
       {/* TÌM KIẾM (Giữ nguyên) */}
       <Box sx={{ mb: 3, width: "100%", maxWidth: "500px" }}>
-        {/* ... TextField (Giữ nguyên) ... */}
         <TextField
           placeholder="Tìm kiếm tên dự án..."
           variant="outlined"
           size="small"
           fullWidth
           sx={{
-            "& .MuiOutlinedInput-root": {
+            "& .MUiOutlinedInput-root": {
               borderRadius: "8px",
               backgroundColor: "#F8F9FA",
               fontSize: "0.9rem",
@@ -130,31 +134,40 @@ export default function DashboardHome() {
         onStatusChange={setSelectedStatus}
       />
 
-      {/* ===  BOX BỌC NGOÀI ĐỂ CĂN GIỮA CỤM GRID === */}
+      {/* === DANH SÁCH DỰ ÁN (LOGIC FLEXBOX THỦ CÔNG) === */}
       <Box
         sx={{
-          width: "100%",
           display: "flex",
-          justifyContent: "center",
+          flexWrap: "wrap",
           mt: 3,
+          // 1. Tạo margin âm để bù đắp cho padding của con
+          margin: (theme) => theme.spacing(-gap / 2),
         }}
       >
-        {/* === DANH SÁCH DỰ ÁN === */}
-        <Grid
-          container
-          spacing={3}
-          sx={{
-            width: "100%",
-            maxWidth: 1300,
-            justifyContent: "flex-start",
-          }}
-        >
-          {filteredProjects.map((project) => (
-            <Grid item key={project.id} xs={12} sm={6} md={4}>
-              <ProjectCard {...project} />
-            </Grid>
-          ))}
-        </Grid>
+        {filteredProjects.map((project) => (
+          // 2. Đây là "cột" 33% của bạn
+          <Box
+            key={project.id}
+            sx={{
+              display: "flex", // Giúp card con cao 100%
+              boxSizing: "border-box",
+
+              // 3. Logic chia cột
+              width: {
+                md: "33.3333%", // 3 cột
+                sm: "50%", // 2 cột
+                xs: "100%", // 1 cột
+              },
+
+              // 4. Đây là "1% gap" của bạn (nửa gap ở mỗi bên)
+              padding: (theme) => theme.spacing(gap / 2),
+            }}
+          >
+            {/* ProjectCard (với width: 100%) sẽ
+                tự động lấp đầy "cột" 33% này */}
+            <ProjectCard {...project} />
+          </Box>
+        ))}
       </Box>
     </Box>
   );

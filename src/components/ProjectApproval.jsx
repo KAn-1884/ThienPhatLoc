@@ -11,12 +11,12 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  Alert, // Giữ lại Alert
+  Alert,
 } from "@mui/material";
 import { useParams, useNavigate } from "react-router-dom";
 // Import dữ liệu giả lập sử dụng Named Import
 import { getApprovalData } from "../data/approvalMockData.js";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack"; // Import icon mới
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import React from "react";
 
 // --- Các hàm định dạng số mới ---
@@ -108,15 +108,24 @@ export default function ProjectApproval() {
   const { formData } = data; // Chỉ cần formData để lấy tên
 
   return (
+    // === BẮT ĐẦU SỬA BOX NÀY ===
     <Box
       sx={{
+        // Các style cũ
         padding: { xs: 1.5, md: 3 },
         backgroundColor: "#FFF",
         borderRadius: "12px",
         minHeight: "80vh",
-        boxShadow: "0 4px 12px rgba(0,0,0,0.05)", // Thêm bóng mờ
+        boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
+
+        // Bổ sung style 96%
+        width: { xs: "100%", md: "96%" },
+        margin: "0 auto",
+        boxSizing: "border-box",
       }}
     >
+      {/* === KẾT THÚC SỬA BOX NÀY === */}
+
       {/* --- THANH ĐIỀU HƯỚNG VÀ TIÊU ĐỀ --- */}
       <Box
         sx={{
@@ -184,10 +193,13 @@ export default function ProjectApproval() {
             </TableRow>
           </TableHead>
           <TableBody>
-            {tableData.map((row) => (
+            {tableData.map((row, i) => (
               <TableRow
                 key={row.stt}
-                sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
+                sx={{
+                  backgroundColor: i % 2 === 0 ? "#FFFFFF" : "#F7FAFC",
+                  "&:last-child td, &:last-child th": { border: 0 },
+                }}
               >
                 <TableCell>{row.stt}</TableCell>
                 <TableCell sx={{ fontWeight: 500 }}>{row.name}</TableCell>

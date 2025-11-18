@@ -1,20 +1,31 @@
-// File: src/pages/ApprovalListPage.jsx
-
-import React from "react";
+import React, { useState } from "react"; // === 1. THÊM useState ===
 import { useNavigate } from "react-router-dom";
-import { Box, Typography, Button, Paper, Chip } from "@mui/material";
+import {
+  Box,
+  Typography,
+  Button,
+  Paper,
+  Chip,
+  Snackbar, // === 2. THÊM Snackbar ===
+  Alert, // === 3. THÊM Alert ===
+} from "@mui/material";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import CancelOutlinedIcon from "@mui/icons-material/CancelOutlined";
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import { projectsToApprove } from "../data/approvalMockData.js";
 
-const ApprovalCard = ({ project, navigate }) => {
+// === 4. SỬA ĐỔI: ApprovalCard nhận thêm props onApprove, onReject ===
+const ApprovalCard = ({ project, navigate, onApprove, onReject }) => {
   const handleApproveQuick = () => {
-    alert(`Dự án "${project.name}" (ID: ${project.id}) ĐÃ ĐƯỢC DUYỆT NHANH!`);
+    // Bỏ alert, gọi hàm từ props
+    // alert(`Dự án "${project.name}" (ID: ${project.id}) ĐÃ ĐƯỢC DUYỆT NHANH!`);
+    onApprove(project);
   };
 
   const handleRejectQuick = () => {
-    alert(`Dự án "${project.name}" (ID: ${project.id}) ĐÃ BỊ TỪ CHỐI NHANH!`);
+    // Bỏ alert, gọi hàm từ props
+    // alert(`Dự án "${project.name}" (ID: ${project.id}) ĐÃ BỊ TỪ CHỐI NHANH!`);
+    onReject(project);
   };
 
   return (
@@ -152,14 +163,13 @@ const ApprovalCard = ({ project, navigate }) => {
         </Box>
       </Box>
 
-      {/* Nút hành động (ĐÃ CẬP NHẬT THEO ẢNH MỚI) */}
+      {/* Nút hành động */}
       <Box
         sx={{
           display: "flex",
-          // Luôn xếp chồng các nút lên nhau trên mobile (xs)
           flexDirection: { xs: "column", md: "row" },
-          gap: 1.5, // Giữ khoảng cách giữa các nút
-          alignItems: { xs: "stretch", md: "center" }, // Kéo dãn các nút con trên mobile
+          gap: 1.5,
+          alignItems: { xs: "stretch", md: "center" },
         }}
       >
         {/* Box chứa 2 nút Duyệt và Từ chối */}
@@ -167,12 +177,9 @@ const ApprovalCard = ({ project, navigate }) => {
           sx={{
             display: "flex",
             gap: 1.5,
-            // Trên mobile, 2 nút này cũng xếp chồng lên nhau
             flexDirection: { xs: "column", md: "row" },
-            // Chiếm 100% chiều rộng trên mobile, giữ 85% trên desktop
             width: { xs: "100%", md: "85%" },
-            // Trên mobile, các nút con tự kéo dãn để chiếm toàn bộ Box cha
-            "& > button": { flex: { xs: "none", md: 1 } }, // Button con không dùng flex:1 trên mobile nữa
+            "& > button": { flex: { xs: "none", md: 1 } },
           }}
         >
           <Button
@@ -184,11 +191,10 @@ const ApprovalCard = ({ project, navigate }) => {
               color: "#FFF",
               textTransform: "none",
               fontWeight: "bold",
-              // Flex:1 trên desktop, nhưng không còn trên mobile để nó tự co dãn 100%
               flex: { xs: "none", md: 1 },
               borderRadius: "8px",
               "&:hover": { backgroundColor: "#154A32" },
-              width: { xs: "100%", md: "auto" }, // Đảm bảo chiếm 100% trên mobile
+              width: { xs: "100%", md: "auto" },
             }}
           >
             Duyệt dự án
@@ -201,11 +207,10 @@ const ApprovalCard = ({ project, navigate }) => {
             sx={{
               textTransform: "none",
               fontWeight: "bold",
-              // Flex:1 trên desktop, nhưng không còn trên mobile
               flex: { xs: "none", md: 1 },
               border: "2px solid #E53E3E",
               borderRadius: "8px",
-              width: { xs: "100%", md: "auto" }, // Đảm bảo chiếm 100% trên mobile
+              width: { xs: "100%", md: "auto" },
             }}
           >
             Từ chối
@@ -215,11 +220,8 @@ const ApprovalCard = ({ project, navigate }) => {
         {/* Box chứa nút Xem chi tiết */}
         <Box
           sx={{
-            // Trên mobile, box này chiếm 100%
             width: { xs: "100%", md: "auto" },
-            // Bỏ ml trên mobile
             ml: { xs: 0, md: 1.5 },
-            // Trên desktop, nó sẽ co lại theo nội dung
             flex: { xs: "none", md: 1 },
           }}
         >
@@ -233,7 +235,7 @@ const ApprovalCard = ({ project, navigate }) => {
               color: "#2D5F3F",
               justifyContent: "center",
               backgroundColor: "#E2E8F0",
-              width: "100%", // Luôn chiếm 100% của Box cha
+              width: "100%",
               borderRadius: "8px",
               "&:hover": { bgcolor: "#e4e4e4ff" },
             }}
@@ -249,22 +251,63 @@ const ApprovalCard = ({ project, navigate }) => {
 export default function ApprovalListPage() {
   const navigate = useNavigate();
 
+  // === 5. THÊM STATE CHO SNACKBAR ===
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success", // "success" (xanh) hoặc "error" (đỏ)
+  });
+
+  // === 6. THÊM HÀM XỬ LÝ CHO SNACKBAR ===
+  const handleApprove = (project) => {
+    console.log("Duyệt dự án:", project.name);
+    setSnackbar({
+      open: true,
+      message: `Đã duyệt nhanh dự án "${project.name}"!`,
+      severity: "success",
+    });
+  };
+
+  const handleReject = (project) => {
+    console.log("Từ chối dự án:", project.name);
+    setSnackbar({
+      open: true,
+      message: `Đã từ chối dự án "${project.name}".`,
+      severity: "error",
+    });
+  };
+
+  const handleCloseSnackbar = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+    setSnackbar((prev) => ({ ...prev, open: false }));
+  };
+  // =======================================
+
   return (
     <Box
       sx={{
-        padding: { xs: 0, md: 0 },
+        backgroundColor: "#FFF",
+        borderRadius: "12px",
+        padding: { xs: 1.5, md: 3 },
+        width: { xs: "100%", md: "96%" },
+        margin: "0 auto",
+        boxSizing: "border-box",
         minHeight: "80vh",
-        backgroundColor: "#fff",
-        borderRadius: "10px",
       }}
     >
       <Typography
         variant="h4"
         align="center"
         sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
           fontWeight: "bold",
           mb: 4,
-          color: "#1C5B41",
+          color: "#000000ff",
+          textAlign: "center",
         }}
       >
         Duyệt dự án
@@ -286,10 +329,30 @@ export default function ApprovalListPage() {
               key={project.id}
               project={project}
               navigate={navigate}
+              // === 7. TRUYỀN HÀM XUỐNG CON ===
+              onApprove={handleApprove}
+              onReject={handleReject}
             />
           ))}
         </Box>
       )}
+
+      {/* === 8. THÊM COMPONENT SNACKBAR VÀO CUỐI === */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={4000} // Tự động tắt sau 4 giây
+        onClose={handleCloseSnackbar}
+        // anchorOrigin để chỉnh vị trí "từ trên đầu xuống"
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert
+          onClose={handleCloseSnackbar}
+          severity={snackbar.severity}
+          sx={{ width: "100%" }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }

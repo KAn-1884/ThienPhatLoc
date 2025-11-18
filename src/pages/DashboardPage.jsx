@@ -25,20 +25,19 @@ import Logo from "../assets/img/logo_TPL.jpeg";
 import { projectData } from "../data/projectData";
 
 function DashboardPage() {
+  // ... (Tất cả logic state và
+  //      function handlers của bạn giữ nguyên) ...
   const navigate = useNavigate();
   const location = useLocation();
   const { instance, accounts, inProgress } = useMsal();
   const isAuthenticated = useIsAuthenticated();
   const isMobile = useMediaQuery("(max-width:900px)");
-
   const [mobileNavAnchorEl, setMobileNavAnchorEl] = useState(null);
   const [userMenuAnchorEl, setUserMenuAnchorEl] = useState(null);
-
   const handleMobileNavOpen = (e) => setMobileNavAnchorEl(e.currentTarget);
   const handleMobileNavClose = () => setMobileNavAnchorEl(null);
   const handleUserMenuOpen = (e) => setUserMenuAnchorEl(e.currentTarget);
   const handleUserMenuClose = () => setUserMenuAnchorEl(null);
-
   const userName = accounts.length > 0 ? accounts[0].name : "User";
   const userInitials =
     userName
@@ -46,23 +45,19 @@ function DashboardPage() {
       .map((n) => n[0])
       .join("")
       .toUpperCase() || "U";
-
   useEffect(() => {
     if (!isAuthenticated && inProgress === "none") {
       navigate("/login");
     }
   }, [isAuthenticated, inProgress, navigate]);
-
   const handleLogout = () => {
     instance.logoutRedirect({
       postLogoutRedirectUri: "/login",
     });
   };
-
   const projectsToApproveCount = projectData.filter(
     (p) => p.status === "Chờ duyệt"
   ).length;
-
   if (inProgress !== "none") {
     return (
       <Box
@@ -82,9 +77,7 @@ function DashboardPage() {
       </Box>
     );
   }
-
   if (!isAuthenticated) return null;
-
   const navItems = [
     {
       label: "Duyệt dự án",
@@ -112,7 +105,7 @@ function DashboardPage() {
         display: "flex",
         flexDirection: "column",
         minHeight: "100vh",
-        backgroundColor: "#F7FAFC",
+        backgroundColor: "#F7FAFC", // <-- Đây là màu xám mờ (gần trắng)
       }}
     >
       <AppBar
@@ -124,6 +117,7 @@ function DashboardPage() {
           borderBottom: "1px solid #E0E0E0",
         }}
       >
+        {/* ... (Code Toolbar của bạn giữ nguyên) ... */}
         <Toolbar>
           <Box
             component="img"
@@ -132,17 +126,13 @@ function DashboardPage() {
             sx={{ width: 40, height: 40, mr: 1.5, cursor: "pointer" }}
             onClick={() => navigate("/")}
           />
-
           <Typography
             variant="h6"
             sx={{ fontWeight: "bold", flexGrow: { xs: 1, md: 0 } }}
           >
             Thiên Phát Lộc E&C
           </Typography>
-
           {!isMobile && <Box sx={{ flexGrow: 1 }} />}
-
-          {/* === NÚT AVATAR TRÊN MOBILE === */}
           {isMobile && (
             <IconButton onClick={handleMobileNavOpen} sx={{ ml: "auto" }}>
               <Avatar sx={{ backgroundColor: "#1C5B41" }}>
@@ -150,8 +140,6 @@ function DashboardPage() {
               </Avatar>
             </IconButton>
           )}
-
-          {/* === NÚT ĐIỀU HƯỚNG TRÊN DESKTOP === */}
           {!isMobile && (
             <>
               {navItems.map(({ label, to, icon, badgeContent }) => {
@@ -193,8 +181,6 @@ function DashboardPage() {
                   </Button>
                 );
               })}
-
-              {/* === NÚT AVATAR TRÊN DESKTOP === */}
               <Button
                 onClick={handleUserMenuOpen}
                 sx={{
@@ -231,8 +217,7 @@ function DashboardPage() {
             </>
           )}
         </Toolbar>
-
-        {/* === MENU NGƯỜI DÙNG (CHO DESKTOP) === */}
+        {/* ... (Code Menus của bạn giữ nguyên) ... */}
         <Menu
           anchorEl={userMenuAnchorEl}
           open={Boolean(userMenuAnchorEl)}
@@ -259,8 +244,6 @@ function DashboardPage() {
             Đăng xuất
           </MenuItem>
         </Menu>
-
-        {/* === MENU ĐIỀU HƯỚNG (CHO MOBILE) === */}
         <Menu
           anchorEl={mobileNavAnchorEl}
           open={Boolean(mobileNavAnchorEl)}
@@ -294,15 +277,21 @@ function DashboardPage() {
         </Menu>
       </AppBar>
 
+      {/* === NỀN XÁM MỜ ĐÂY === */}
       <Box
         component="main"
         sx={{
           flexGrow: 1,
-          backgroundColor: "#f4f6f8",
-          py: { xs: 0, md: 3 },
+          backgroundColor: "#f4f6f8", // <-- NỀN XÁM MỜ CỦA BẠN
+          py: { xs: 0, md: 3 }, // Padding trên/dưới
         }}
       >
         <Outlet />
+        {/* Outlet sẽ render:
+            1. DashboardHome (trắng, 96%, căn giữa)
+            2. HOẶC CreatePage (trắng, 100%, sát lề)
+            ...tùy vào URL
+        */}
       </Box>
     </Box>
   );

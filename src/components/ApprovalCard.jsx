@@ -1,3 +1,4 @@
+import React from "react";
 import {
   Box,
   Typography,
@@ -18,11 +19,9 @@ import {
 } from "@mui/material";
 import SaveIcon from "@mui/icons-material/Save";
 import { useState } from "react";
-// === 1. CẬP NHẬT IMPORT ===
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { numberToVietnameseWords } from "../changeNum2Word/num2wod.jsx";
 import checktickIcon from "../assets/img/checktickIcon.svg";
-// === 2. IMPORT DATA MỚI ===
 import { getApprovalData } from "../data/approvalMockData.js";
 
 const formatDisplayDate = (dateString) => {
@@ -49,22 +48,14 @@ const InfoRow = ({ label, value }) => (
 export default function ApprovalCard() {
   const location = useLocation();
   const navigate = useNavigate();
-  // === 3. LẤY ID TỪ URL ===
   const { projectId } = useParams();
 
-  // === 4. LOGIC LẤY DATA MỚI ===
-  // 1. Thử lấy data từ state (khi đi từ trang Create, nếu có)
   let data = location.state;
-
-  // 2. Nếu không có state, VÀ có projectId (khi đi từ trang Approval)
   if (!data && projectId) {
-    // Tải data "fake" từ file mock
     data = getApprovalData(projectId);
   }
 
-  // 3. Bóc tách data (nếu data tồn tại)
   const { formData, workItems, totalCost, approvalState } = data || {};
-  // =========================
 
   const [openSubmitDialog, setOpenSubmitDialog] = useState(false);
   const [openSuccessDialog, setOpenSuccessDialog] = useState(false);
@@ -110,7 +101,6 @@ export default function ApprovalCard() {
   }
 
   return (
-    // Phần JSX còn lại giữ nguyên
     <Box sx={{ backgroundColor: "#f9fafb", minHeight: "100vh" }}>
       <Container maxWidth="lg" sx={{ py: 4 }}>
         <Paper
@@ -220,7 +210,9 @@ export default function ApprovalCard() {
                   <TableRow
                     key={row.id}
                     sx={{
-                      backgroundColor: i % 2 === 0 ? "#FFFFFF" : "#F7FAFC",
+                      // === KHÔI PHỤC LẠI LOGIC CŨ CHO FILE NÀY ===
+                      // STT 1 (index 0) màu nhạt, STT 2 (index 1) màu trắng
+                      backgroundColor: i % 2 === 0 ? "#F7FAFC" : "#FFFFFF",
                     }}
                   >
                     <TableCell sx={{ borderBottom: "1px solid #E5E7EB" }}>
@@ -329,7 +321,6 @@ export default function ApprovalCard() {
         </Paper>
 
         {/* --- Nút hành động --- */}
-        {/* Chỉ hiển thị nút 'Gửi duyệt' nếu đây là phiếu mới (không có projectId) */}
         {!projectId && (
           <Box
             textAlign="center"
